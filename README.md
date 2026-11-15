@@ -14,7 +14,7 @@ Projeto de dados abertos: para onde vai o dinheiro do governo federal, em valore
 |---|---|---|
 | Banco Central (SGS) | IPCA (433), Selic mensal (4390), PIB 12m (4382) | implementado |
 | Portal da Transparência | Despesas (empenho, liquidação, pagamento) | a implementar (`pipeline/transparencia.py`) |
-| Tesouro Transparente | Resultado do Tesouro Nacional (desde 1997) | download implementado; falta normalizar (`pipeline/tesouro.py`) |
+| Tesouro Transparente | Resultado do Tesouro Nacional (desde 1997) | implementado (`pipeline/tesouro.py`): 11 abas mensais em formato longo, valores correntes e em R$ de jul/2026 (IPCA) |
 
 ## Estrutura
 ```
