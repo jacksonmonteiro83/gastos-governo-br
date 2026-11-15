@@ -1,0 +1,13 @@
+name: gastos_governo
+version: "0.1.0"
+config-version: 2
+profile: gastos_governo
+
+model-paths: ["models"]
+
+models:
+  gastos_governo:
+    staging:
+      +materialized: view
+    marts:
+      +materialized: table

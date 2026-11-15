@@ -1,0 +1,15 @@
+version: 2
+
+models:
+  - name: stg_ipca
+    columns:
+      - name: data
+        tests: [not_null, unique]
+      - name: variacao_pct
+        tests: [not_null]
+  - name: ipca_indice
+    columns:
+      - name: data
+        tests: [not_null, unique]
+      - name: fator_para_hoje
+        tests: [not_null]

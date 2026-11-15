@@ -1,0 +1,6 @@
+gastos_governo:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: ../data/gastos.duckdb
