@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Para onde vai o dinheiro do governo federal</title>
+<meta name="description" content="Juros, previdência, pessoal, saúde, educação e investimento do governo central desde 1997, em valores corrigidos pelo IPCA.">
+<style>
+  :root {
+    color-scheme: light;
+    --surface: #fcfcfb; --surface-2: #f4f3f0; --border: #e2e1dc; --grid: #ecebe7;
+    --text: #0b0b0b; --text-2: #52514e; --text-3: #6f6e69;
+    --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100;
+    --s5: #e87ba4; --s6: #008300; --s7: #6250d6; --s8: #e34948;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) {
+      color-scheme: dark;
+      --surface: #1a1a19; --surface-2: #232321; --border: #383835; --grid: #2a2a28;
+      --text: #f0efec; --text-2: #c3c2b7; --text-3: #a09f96;
+      --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
+      --s5: #d55181; --s6: #0ca30c; --s7: #9085e9; --s8: #e66767;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --surface: #1a1a19; --surface-2: #232321; --border: #383835; --grid: #2a2a28;
+    --text: #f0efec; --text-2: #c3c2b7; --text-3: #a09f96;
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
+    --s5: #d55181; --s6: #0ca30c; --s7: #9085e9; --s8: #e66767;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--surface); color: var(--text);
+         font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 960px; margin: 0 auto; padding: 24px 16px 64px; }
+  header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+  h1 { font-size: 1.5rem; line-height: 1.25; margin: 0 0 4px; }
+  .sub { color: var(--text-2); font-size: .9rem; margin: 0; }
+  button.tema { background: var(--surface-2); color: var(--text-2); border: 1px solid var(--border);
+                border-radius: 8px; padding: 6px 10px; font: inherit; font-size: .85rem; cursor: pointer; }
+  .hero { margin: 32px 0 24px; }
+  .hero .num { font-size: clamp(2.6rem, 9vw, 4rem); font-weight: 700; line-height: 1.05; letter-spacing: -.02em; }
+  .hero .leg { color: var(--text-2); margin: 6px 0 0; max-width: 40em; }
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 40px; }
+  .kpi { background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
+  .kpi .v { font-size: 1.6rem; font-weight: 700; line-height: 1.2; }
+  .kpi .l { color: var(--text-2); font-size: .85rem; margin-top: 2px; }
+  section.card { margin-bottom: 40px; }
+  h2 { font-size: 1.1rem; margin: 0 0 4px; }
+  .nota { color: var(--text-2); font-size: .85rem; margin: 0 0 12px; }
+  .legenda { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0 0 8px; padding: 0; list-style: none;
+             font-size: .85rem; color: var(--text-2); }
+  .legenda i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+  .chart { position: relative; }
+  .chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .tip { position: absolute; pointer-events: none; background: var(--surface); color: var(--text);
+         border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: .8rem;
+         box-shadow: 0 4px 14px rgba(0,0,0,.14); white-space: nowrap; display: none; z-index: 2; }
+  .tip b { display: block; margin-bottom: 4px; }
+  .tip div { display: flex; justify-content: space-between; gap: 14px; }
+  .tip i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 6px; }
+  .tip .v { font-variant-numeric: tabular-nums; color: var(--text-2); }
+  details { margin-top: 10px; font-size: .85rem; color: var(--text-2); }
+  summary { cursor: pointer; }
+  .tabela { overflow-x: auto; margin-top: 8px; max-height: 360px; overflow-y: auto; }
+  table { border-collapse: collapse; font-size: .8rem; font-variant-numeric: tabular-nums; }
+  th, td { padding: 4px 10px; text-align: right; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; position: sticky; left: 0; background: var(--surface); }
+  thead th { position: sticky; top: 0; background: var(--surface); }
+  footer { color: var(--text-2); font-size: .82rem; border-top: 1px solid var(--border); padding-top: 16px; }
+  footer p { margin: 0 0 8px; }
+  a { color: var(--s1); }
+  .eixo text { fill: var(--text-3); font-size: 11px; }
+  .rot text { fill: var(--text-2); font-size: 12px; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1>Para onde vai o dinheiro do governo federal</h1>
+      <p class="sub" id="sub"></p>
+    </div>
+    <button class="tema" id="tema" type="button" aria-label="Alternar tema claro e escuro">Tema</button>
+  </header>
+
+  <div class="hero">
+    <div class="num" id="hero-num"></div>
+    <p class="leg" id="hero-leg"></p>
+  </div>
+  <div class="kpis" id="kpis"></div>
+
+  <section class="card">
+    <h2>Juros contra o resto</h2>
+    <p class="nota" id="nota1"></p>
+    <ul class="legenda" id="leg1"></ul>
+    <div class="chart" id="c1"></div>
+    <details><summary>Ver dados em tabela</summary><div class="tabela" id="t1"></div></details>
+  </section>
+
+  <section class="card">
+    <h2>De que é feito o gasto total, ano a ano</h2>
+    <p class="nota">R$ bilhões de <span class="ref"></span>, anos completos. Juros mais as quatro grandes contas da despesa primária.</p>
+    <ul class="legenda" id="leg2"></ul>
+    <div class="chart" id="c2"></div>
+    <details><summary>Ver dados em tabela</summary><div class="tabela" id="t2"></div></details>
+  </section>
+
+  <footer>
+    <p><b>Como ler.</b> Todos os valores estão em reais de <span class="ref"></span> (corrigidos pelo IPCA), então anos diferentes são comparáveis. Os gráficos usam só anos completos; o total do topo vai até <span id="ate"></span>.</p>
+    <p><b>Juros</b> são os juros nominais do governo central (critério "abaixo da linha", dados do Banco Central), líquidos de receitas de juros. Não são o total bruto que aparece no orçamento, e em alguns meses o valor líquido chega a ser positivo.</p>
+    <p><b>Saúde e educação</b> aqui são só as despesas do Poder Executivo sujeitas à programação financeira. Folha de servidores (que fica em "Pessoal e encargos"), complemento do Fundeb e transferências a estados e municípios ficam de fora, então os valores subestimam o gasto total nessas áreas.</p>
+    <p><b>Fontes:</b> <a href="https://www.tesourotransparente.gov.br/ckan/dataset/resultado-do-tesouro-nacional">Resultado do Tesouro Nacional (Tesouro Transparente)</a> e Banco Central do Brasil. Código e método: <a href="https://github.com/jacksonmonteiro83/gastos-governo-br">github.com/jacksonmonteiro83/gastos-governo-br</a>.</p>
+  </footer>
+</main>
+<div class="tip" id="tip"></div>
+
+<script src="data.js"></script>
+<script>
+(function () {
+  const D = window.DADOS;
+  const fmt0 = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 });
+  const fmt1 = new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  const fmt2 = new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const num = (v) => (v == null ? "—" : fmt0.format(v));
+  const MESES = ["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
+  const mesAno = (s) => { const [a, m] = s.split("-"); return MESES[+m - 1] + "/" + a; };
+
+  // anos completos
+  const idx = D.anos.map((_, i) => i).filter(i => D.meses[i] === 12);
+  const anos = idx.map(i => D.anos[i]);
+  const val = (k) => idx.map(i => D.series[k].valores[i]);
+  const prim = idx.map(i => D.despesa_primaria[i]);
+
+  // cor por entidade (fixa em todo o painel)
+  const COR = { juros: "--s1", previdencia: "--s2", pessoal: "--s3", outras_obrigatorias: "--s4",
+                executivo: "--s5", saude: "--s6", educacao: "--s7", investimento: "--s8" };
+  const ROT = { juros: "Juros da dívida", previdencia: "Previdência", pessoal: "Pessoal e encargos",
+                outras_obrigatorias: "Outras obrigatórias", executivo: "Demais do Executivo",
+                saude: "Saúde*", educacao: "Educação*", investimento: "Investimento" };
+  const NS = "http://www.w3.org/2000/svg";
+  const css = (v) => "var(" + v + ")";
+
+  // ---------- topo ----------
+  document.querySelectorAll(".ref").forEach(e => e.textContent = D.referencia);
+  document.getElementById("ate").textContent = mesAno(D.ultimo_mes);
+  document.getElementById("sub").textContent =
+    "Governo central, jan/1997 a " + mesAno(D.ultimo_mes) + " · R$ de " + D.referencia + " (IPCA)";
+  const H = D.destaques, ref = H.ano_referencia, ri = D.anos.indexOf(ref);
+  document.getElementById("hero-num").textContent = "R$ " + fmt2.format(H.juros_total_tri) + " tri";
+  document.getElementById("hero-leg").textContent =
+    "pagos em juros da dívida desde 1997, em valores de hoje. É " + fmt1.format(H.juros_pct_gasto_total) +
+    "% de tudo que o governo central gastou, somando juros e despesas primárias.";
+  const juros = D.series.juros.valores[ri], inv = D.series.investimento.valores[ri];
+  const share = 100 * juros / (juros + D.despesa_primaria[ri]);
+  document.getElementById("kpis").innerHTML = [
+    ["R$ " + fmt2.format(H.juros_por_dia_bi) + " bi", "por dia em juros, em " + ref],
+    ["R$ " + fmt0.format(juros) + " bi", "em juros em " + ref + ": " + fmt1.format(juros / inv) + "× o investimento federal (R$ " + fmt0.format(inv) + " bi)"],
+    [fmt1.format(share) + "%", "do gasto total de " + ref + " foram juros"],
+  ].map(([v, l]) => '<div class="kpi"><div class="v">' + v + '</div><div class="l">' + l + '</div></div>').join("");
+  document.getElementById("nota1").textContent =
+    "R$ bilhões de " + D.referencia + " por ano. *Saúde e educação: só despesas do Executivo sujeitas à programação financeira (veja a nota no rodapé). Saúde, educação e investimento só existem na série a partir de 2008.";
+
+  // ---------- helpers ----------
+  const el = (n, a, p) => { const e = document.createElementNS(NS, n); for (const k in a) e.setAttribute(k, a[k]); if (p) p.appendChild(e); return e; };
+  const niceMax = (m, step) => Math.ceil(m / step) * step;
+  const tip = document.getElementById("tip");
+  function showTip(host, html, x, y) {
+    tip.innerHTML = html; tip.style.display = "block";
+    const r = host.getBoundingClientRect(), t = tip.getBoundingClientRect();
+    let left = x + r.left + window.scrollX + 14, top = y + r.top + window.scrollY - t.height / 2;
+    if (left + t.width > window.scrollX + document.documentElement.clientWidth - 8) left = x + r.left + window.scrollX - t.width - 14;
+    tip.style.left = Math.max(8, left) + "px"; tip.style.top = Math.max(8, top) + "px";
+  }
+  const hideTip = () => { tip.style.display = "none"; };
+  const legenda = (id, keys) => {
+    document.getElementById(id).innerHTML = keys.map(k =>
+      '<li><i style="background:' + css(COR[k]) + '"></i>' + ROT[k] + '</li>').join("");
+  };
+  function tabela(id, keys, extra) {
+    const head = "<tr><th>Ano</th>" + keys.map(k => "<th>" + ROT[k] + "</th>").join("") + (extra ? "<th>" + extra.rot + "</th>" : "") + "</tr>";
+    const rows = anos.map((a, i) => "<tr><td>" + a + "</td>" + keys.map(k => "<td>" + num(val(k)[i]) + "</td>").join("") +
+      (extra ? "<td>" + fmt0.format(extra.v[i]) + "</td>" : "") + "</tr>").join("");
+    document.getElementById(id).innerHTML = "<table><thead>" + head + "</thead><tbody>" + rows + "</tbody></table>";
+  }
+  function eixoX(svg, x, top, bottom) {
+    const g = el("g", { class: "eixo" }, svg);
+    anos.forEach((a, i) => { if (a % 5 === 0) el("text", { x: x(i), y: bottom + 16, "text-anchor": "middle" }, g).textContent = a; });
+  }
+  function eixoY(svg, y, max, step, left, right) {
+    const g = el("g", { class: "eixo" }, svg);
+    for (let v = 0; v <= max; v += step) {
+      el("line", { x1: left, x2: right, y1: y(v), y2: y(v), stroke: css("--grid"), "stroke-width": 1 }, svg);
+      el("text", { x: left - 6, y: y(v) + 4, "text-anchor": "end" }, g).textContent = fmt0.format(v);
+    }
+  }
+
+  // ---------- gráfico 1: linhas ----------
+  const K1 = ["juros", "saude", "educacao", "investimento"];
+  function linhas() {
+    const host = document.getElementById("c1"); host.querySelectorAll("svg").forEach(s => s.remove());
+    const W = Math.max(300, host.clientWidth), Ht = W < 520 ? 260 : 320;
+    const m = { l: 40, r: W < 520 ? 84 : 112, t: 10, b: 24 };
+    const svg = el("svg", { viewBox: "0 0 " + W + " " + Ht, role: "img",
+      "aria-label": "Linhas: juros, saúde, educação e investimento por ano, em R$ bilhões. Juros em " + ref + ": " + fmt0.format(juros) + " bilhões." });
+    host.insertBefore(svg, host.firstChild);
+    const max = niceMax(Math.max(...val("juros")), 200), step = 200;
+    const x = (i) => m.l + (W - m.l - m.r) * i / (anos.length - 1);
+    const y = (v) => Ht - m.b - (Ht - m.t - m.b) * v / max;
+    eixoY(svg, y, max, step, m.l, W - m.r); eixoX(svg, x, m.t, Ht - m.b);
+    const fim = [];
+    K1.forEach(k => {
+      const v = val(k);
+      let d = "", iniciou = false;
+      v.forEach((n, i) => { if (n == null) return; d += (iniciou ? "L" : "M") + x(i).toFixed(1) + "," + y(n).toFixed(1); iniciou = true; });
+      el("path", { d, fill: "none", stroke: css(COR[k]), "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }, svg);
+      el("circle", { cx: x(v.length - 1), cy: y(v[v.length - 1]), r: 4, fill: css(COR[k]), stroke: css("--surface"), "stroke-width": 2 }, svg);
+      fim.push({ k, y: y(v[v.length - 1]) });
+    });
+    // rótulos diretos, sem sobreposição
+    fim.sort((a, b) => a.y - b.y);
+    for (let i = 1; i < fim.length; i++) if (fim[i].y - fim[i - 1].y < 14) fim[i].y = fim[i - 1].y + 14;
+    const g = el("g", { class: "rot" }, svg);
+    fim.forEach(f => {
+      el("circle", { cx: W - m.r + 12, cy: f.y, r: 4, fill: css(COR[f.k]) }, g);
+      el("text", { x: W - m.r + 20, y: f.y + 4 }, g).textContent = (W < 520 && f.k === "juros") ? "Juros" : ROT[f.k];
+    });
+    // hover
+    const guia = el("line", { y1: m.t, y2: Ht - m.b, stroke: css("--text-3"), "stroke-width": 1, "stroke-dasharray": "3 3", visibility: "hidden" }, svg);
+    const pts = K1.map(k => el("circle", { r: 4, fill: css(COR[k]), stroke: css("--surface"), "stroke-width": 2, visibility: "hidden" }, svg));
+    const alvo = el("rect", { x: m.l, y: m.t, width: W - m.l - m.r, height: Ht - m.t - m.b, fill: "transparent" }, svg);
+    const mover = (ev) => {
+      const r = svg.getBoundingClientRect(), px = (ev.clientX - r.left) * W / r.width;
+      let i = Math.round((px - m.l) / (W - m.l - m.r) * (anos.length - 1));
+      i = Math.max(0, Math.min(anos.length - 1, i));
+      guia.setAttribute("x1", x(i)); guia.setAttribute("x2", x(i)); guia.setAttribute("visibility", "visible");
+      K1.forEach((k, j) => {
+        const n = val(k)[i];
+        if (n == null) { pts[j].setAttribute("visibility", "hidden"); return; }
+        pts[j].setAttribute("cx", x(i)); pts[j].setAttribute("cy", y(n)); pts[j].setAttribute("visibility", "visible");
+      });
+      const html = "<b>" + anos[i] + "</b>" + K1.map(k => '<div><span><i style="background:' + css(COR[k]) + '"></i>' + ROT[k] +
+        '</span><span class="v">' + (val(k)[i] == null ? "sem dado" : "R$ " + fmt0.format(val(k)[i]) + " bi") + '</span></div>').join("");
+      showTip(host, html, x(i) * r.width / W, ev.clientY - r.top);
+    };
+    const sair = () => { guia.setAttribute("visibility", "hidden"); pts.forEach(p => p.setAttribute("visibility", "hidden")); hideTip(); };
+    alvo.addEventListener("pointermove", mover); alvo.addEventListener("pointerleave", sair);
+  }
+
+  // ---------- gráfico 2: colunas empilhadas ----------
+  const K2 = ["juros", "previdencia", "pessoal", "outras_obrigatorias", "executivo"];
+  function colunas() {
+    const host = document.getElementById("c2"); host.querySelectorAll("svg").forEach(s => s.remove());
+    const W = Math.max(300, host.clientWidth), Ht = W < 520 ? 260 : 340;
+    const m = { l: 40, r: 6, t: 10, b: 24 };
+    const svg = el("svg", { viewBox: "0 0 " + W + " " + Ht, role: "img",
+      "aria-label": "Colunas empilhadas do gasto total por ano: juros, previdência, pessoal, outras obrigatórias e demais despesas do Executivo." });
+    host.insertBefore(svg, host.firstChild);
+    const tot = anos.map((_, i) => K2.reduce((s, k) => s + val(k)[i], 0));
+    const max = niceMax(Math.max(...tot), 500), step = 500;
+    const slot = (W - m.l - m.r) / anos.length, bw = Math.max(4, slot * 0.7);
+    const xc = (i) => m.l + slot * i + slot / 2;
+    const y = (v) => Ht - m.b - (Ht - m.t - m.b) * v / max;
+    eixoY(svg, y, max, step, m.l, W - m.r); eixoX(svg, xc, m.t, Ht - m.b);
+    const barras = anos.map((_, i) => {
+      let acc = 0; const g = el("g", {}, svg);
+      K2.forEach(k => {
+        const v = val(k)[i], y0 = y(acc), y1 = y(acc + v); acc += v;
+        el("rect", { x: xc(i) - bw / 2, y: y1, width: bw, height: Math.max(0, y0 - y1), fill: css(COR[k]),
+          stroke: css("--surface"), "stroke-width": 2 }, g);
+      });
+      return g;
+    });
+    const guia = el("rect", { y: m.t, height: Ht - m.t - m.b, width: slot, fill: css("--text"), opacity: 0.06, visibility: "hidden" }, svg);
+    const alvo = el("rect", { x: m.l, y: m.t, width: W - m.l - m.r, height: Ht - m.t - m.b, fill: "transparent" }, svg);
+    alvo.addEventListener("pointermove", (ev) => {
+      const r = svg.getBoundingClientRect(), px = (ev.clientX - r.left) * W / r.width;
+      const i = Math.max(0, Math.min(anos.length - 1, Math.floor((px - m.l) / slot)));
+      guia.setAttribute("x", xc(i) - slot / 2); guia.setAttribute("visibility", "visible");
+      const html = "<b>" + anos[i] + " · R$ " + fmt0.format(tot[i]) + " bi</b>" + K2.map(k =>
+        '<div><span><i style="background:' + css(COR[k]) + '"></i>' + ROT[k] + '</span><span class="v">' +
+        fmt0.format(val(k)[i]) + ' (' + fmt0.format(100 * val(k)[i] / tot[i]) + '%)</span></div>').join("");
+      showTip(host, html, xc(i) * r.width / W, ev.clientY - r.top);
+    });
+    alvo.addEventListener("pointerleave", () => { guia.setAttribute("visibility", "hidden"); hideTip(); });
+  }
+
+  legenda("leg1", K1); legenda("leg2", K2);
+  tabela("t1", K1); tabela("t2", K2, { rot: "Total", v: anos.map((_, i) => K2.reduce((s, k) => s + val(k)[i], 0)) });
+  const desenhar = () => { linhas(); colunas(); };
+  desenhar();
+  let t; window.addEventListener("resize", () => { clearTimeout(t); t = setTimeout(desenhar, 120); });
+
+  // tema
+  const raiz = document.documentElement;
+  document.getElementById("tema").addEventListener("click", () => {
+    const escuro = raiz.dataset.theme ? raiz.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+    raiz.dataset.theme = escuro ? "light" : "dark";
+  });
+})();
+</script>
+</body>
+</html>

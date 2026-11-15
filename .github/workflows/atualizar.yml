@@ -20,6 +20,12 @@ jobs:
       - run: pip install -r requirements.txt
       - run: python -m pytest -q
       - run: make ingest
+      - run: python -m pipeline.agregar
+      - name: Publicar dados do dashboard
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/data.js
+          git diff --cached --quiet || (git commit -m "Atualiza dados do dashboard" && git push)
+      # dbt por último: uma falha nele não impede a publicação dos dados acima.
       - run: make build
-      # Publicar o resultado (ex.: exportar JSON/Parquet para dashboard/data)
-      # e fazer commit fica para quando o dashboard existir.
