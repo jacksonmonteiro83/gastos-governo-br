@@ -1,0 +1,30 @@
+name: Inspecionar CPGF
+
+on:
+  workflow_dispatch:
+    inputs:
+      mes:
+        description: "Mês a baixar (AAAAMM)"
+        default: "202401"
+        required: true
+
+jobs:
+  inspecionar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Baixar e inspecionar o mês
+        env:
+          MES: ${{ inputs.mes }}
+        run: python -m pipeline.cpgf --inspecionar "$MES" | tee inspecao_cpgf.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cpgf-amostra
+          path: |
+            inspecao_cpgf.txt
+            data/raw/cpgf/*.zip
