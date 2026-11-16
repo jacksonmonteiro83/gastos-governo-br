@@ -1,0 +1,21 @@
+name: Inspecionar IBGE
+
+on:
+  workflow_dispatch:
+
+jobs:
+  inspecionar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install requests
+      - name: Inspecionar tabelas de projeção
+        run: python -m pipeline.ibge --inspecionar | tee ibge-inspecao.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ibge-inspecao
+          path: ibge-inspecao.txt
