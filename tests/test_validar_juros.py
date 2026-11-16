@@ -19,7 +19,7 @@ def test_juros_tesouro_inverte_sinal_e_usa_tabela_corrente():
 
 
 def test_comparar_series_iguais():
-    t = _serie([100.0] * 12)
+    t = _serie([100.0 + 10 * i for i in range(12)])  # variância > 0: correlação definida
     anual, r = comparar(t, t.copy())
     assert r["meses"] == 12 and r["correlacao"] == 1.0 and not r["sinal_invertido"]
     assert anual.loc[2024, "dif"] == 0 and anual.loc[2024, "dif_pct"] == 0
