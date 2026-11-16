@@ -23,14 +23,16 @@ def _base():
 
 
 def test_necessidade_cobertura_e_pib():
-    pib = pd.DataFrame({"data": ["2011-12-01"], "valor": [10000.0]})
+    # série mensal completa (como no SGS): só dezembro deve ser usado
+    pib = pd.DataFrame({"data": [f"{a}-{m:02d}-01" for a in (2010, 2011) for m in range(1, 13)],
+                        "valor": [1.0] * 11 + [20000.0] + [1.0] * 11 + [10000.0]})
     r = agregar(_base(), pib)
     assert r["anos"] == [2009, 2010, 2011] and r["meses"] == [12, 12, 12]
     assert r["arrecadacao"][0] == 7.2 and r["beneficios"][0] == 12.0   # 600*12/1000 e 1000*12/1000
     assert r["necessidade"][0] == 4.8
     assert r["cobertura_pct"][0] == 60.0
     assert r["beneficios_pct_despesa_primaria"][0] == 40.0
-    assert r["pct_pib_necessidade"] == [None, None, 24.0]               # (6000-3600)/10000, só 2011 tem PIB
+    assert r["pct_pib_necessidade"] == [None, 12.0, 24.0]  # (6000-3600)/PIB de dezembro; 2009 sem PIB
     assert r["destaques"]["ano_referencia"] == 2011
     assert r["destaques"]["beneficios_crescimento_real_desde_2010_pct"] == 0.0
 

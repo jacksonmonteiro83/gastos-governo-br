@@ -66,7 +66,8 @@ def agregar(df: pd.DataFrame, pib: pd.DataFrame | None = None) -> dict:
     if pib is not None and len(pib):
         p = pib.copy()
         p["data"] = pd.to_datetime(p["data"])
-        pib_ano = p[p["data"].dt.month == 12].set_index(p["data"].dt.year)["valor"]
+        dez = p[p["data"].dt.month == 12]
+        pib_ano = pd.Series(dez["valor"].to_numpy(), index=dez["data"].dt.year.to_numpy())
     pct_pib_saldo, pct_pib_benef = [], []
     ac, bc, _ = _mensais(df, TAB_CORRENTE)
     Ac, Bc = ac.groupby(ac.index.year).sum(), bc.groupby(bc.index.year).sum()
