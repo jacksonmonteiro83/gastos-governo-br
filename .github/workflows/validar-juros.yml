@@ -1,0 +1,23 @@
+name: Validar juros (Tesouro x Banco Central)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  validar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Baixar e normalizar o Tesouro
+        run: python -m pipeline.tesouro
+      - name: Comparar com as séries do Banco Central
+        run: python -m pipeline.validar_juros | tee validacao_juros.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: validacao-juros
+          path: validacao_juros.txt
