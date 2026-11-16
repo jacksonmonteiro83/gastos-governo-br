@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Previdência do INSS: quanto entra e quanto sai</title>
+<meta name="description" content="Arrecadação líquida e benefícios do INSS (RGPS) desde 1997, corrigidos pelo IPCA, e quanto o Tesouro cobre a cada ano.">
+<link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+<main>
+  <nav class="menu" aria-label="Seções">
+    <a href="index.html">Visão geral</a>
+    <a href="previdencia.html" aria-current="page">Previdência</a>
+    <a href="cartao.html">Cartão corporativo</a>
+  </nav>
+  <header>
+    <div>
+      <h1>Previdência do INSS: quanto entra e quanto sai</h1>
+      <p class="sub" id="sub"></p>
+    </div>
+    <button class="tema" id="tema" type="button" aria-label="Alternar tema claro e escuro">Tema</button>
+  </header>
+
+  <div id="vazio" class="aviso" hidden>
+    Os dados deste painel ainda não foram gerados. No GitHub, rode o workflow <b>Atualizar dados</b> (aba Actions) e recarregue a página.
+  </div>
+
+  <div id="conteudo" hidden>
+    <div class="hero">
+      <div class="num" id="hero-num"></div>
+      <p class="leg" id="hero-leg"></p>
+    </div>
+    <div class="kpis" id="kpis"></div>
+
+    <section class="card">
+      <h2>O que entra contra o que sai</h2>
+      <p class="nota">R$ bilhões de <span class="ref"></span> por ano (anos completos). A distância entre as linhas é o que o Tesouro cobre.</p>
+      <ul class="legenda" id="leg1"></ul>
+      <div class="chart" id="c1"></div>
+      <details><summary>Ver dados em tabela</summary><div class="tabela" id="t1"></div></details>
+    </section>
+
+    <section class="card">
+      <h2>Quanto o Tesouro cobre por ano</h2>
+      <p class="nota">Benefícios menos arrecadação líquida, em R$ bilhões de <span class="ref"></span>.</p>
+      <div class="chart" id="c2"></div>
+    </section>
+
+    <footer>
+      <p><b>Como ler.</b> Arrecadação líquida é a contribuição previdenciária que sobra depois de compensações e devoluções. Benefícios são aposentadorias, pensões, auxílios e salário-maternidade do Regime Geral (INSS), mais sentenças e precatórios previdenciários, que causam picos em alguns anos. O "déficit" do RGPS inclui a previdência rural, que o desenho constitucional financia em parte por impostos; há debate sobre contar isso como rombo. O painel mostra o número e deixa a leitura para você.</p>
+      <p><b>O que não é.</b> Não inclui servidores públicos (regimes próprios), nem o BPC (assistência, não previdência), nem projeção futura.</p>
+      <p><b>Fonte:</b> <a href="https://www.tesourotransparente.gov.br/publicacoes/resultado-do-tesouro-nacional-rtn/">Resultado do Tesouro Nacional</a>, tabelas 1.2 e 1.2-A; PIB: Banco Central (SGS 4382). Código: <a href="https://github.com/jacksonmonteiro83/gastos-governo-br">github.com/jacksonmonteiro83/gastos-governo-br</a>.</p>
+    </footer>
+  </div>
+</main>
+<div class="tip" id="tip"></div>
+
+<script src="previdencia_data.js" onerror="void 0"></script>
+<script>
+(function () {
+  const D = window.PREV;
+  const raiz = document.documentElement;
+  document.getElementById("tema").addEventListener("click", () => {
+    const escuro = raiz.dataset.theme ? raiz.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+    raiz.dataset.theme = escuro ? "light" : "dark";
+  });
+  if (!D) { document.getElementById("vazio").hidden = false; return; }
+  document.getElementById("conteudo").hidden = false;
+
+  const fmt0 = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 });
+  const fmt1 = new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  const fmt2 = new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const MESES = ["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
+  const mesAno = (s) => { const [a, m] = s.split("-"); return MESES[+m - 1] + "/" + a; };
+  const NS = "http://www.w3.org/2000/svg";
+  const el = (n, a, p) => { const e = document.createElementNS(NS, n); for (const k in a) e.setAttribute(k, a[k]); if (p) p.appendChild(e); return e; };
+
+  const H = D.destaques, ref = H.ano_referencia;
+  document.querySelectorAll(".ref").forEach(e => e.textContent = D.referencia);
+  document.getElementById("sub").textContent = "INSS (RGPS), jan/1997 a " + mesAno(D.ultimo_mes) + " · R$ de " + D.referencia + " (IPCA)";
+  document.getElementById("hero-num").textContent = "R$ " + fmt0.format(H.necessidade_bi) + " bi";
+  document.getElementById("hero-leg").textContent =
+    "foi o que o Tesouro cobriu em " + ref + " para pagar o que a contribuição previdenciária não alcançou: " +
+    fmt1.format(100 - H.cobertura_pct) + "% dos benefícios.";
+  const kpis = [
+    [fmt1.format(H.cobertura_pct) + "%", "dos benefícios de " + ref + " foram pagos pela arrecadação do próprio INSS"],
+    [fmt1.format(H.beneficios_pct_despesa_primaria) + "%", "da despesa primária federal em " + ref + " foi benefício previdenciário"],
+    ["R$ " + fmt2.format(H.necessidade_por_dia_bi) + " bi", "por dia cobertos pelo Tesouro em " + ref],
+  ];
+  if (H.pct_pib_necessidade != null) kpis.push([fmt1.format(H.pct_pib_necessidade) + "%", "do PIB em " + ref + " foi a diferença"]);
+  document.getElementById("kpis").innerHTML = kpis.map(([v, l]) => '<div class="kpi"><div class="v">' + v + '</div><div class="l">' + l + '</div></div>').join("");
+
+  const idx = D.anos.map((_, i) => i).filter(i => D.meses[i] === 12);
+  const anos = idx.map(i => D.anos[i]);
+  const col = (k) => idx.map(i => D[k][i]);
+  const S = [["arrecadacao", "Arrecadação líquida", "--s1"], ["beneficios", "Benefícios pagos", "--s2"]];
+  document.getElementById("leg1").innerHTML = S.map(([k, r, c]) => '<li><i style="background:var(' + c + ')"></i>' + r + '</li>').join("");
+  document.getElementById("t1").innerHTML = "<table><thead><tr><th>Ano</th><th>Arrecadação</th><th>Benefícios</th><th>Diferença</th><th>Cobertura %</th><th>% do PIB (dif.)</th></tr></thead><tbody>" +
+    anos.map((a, i) => "<tr><td>" + a + "</td><td>" + fmt1.format(col("arrecadacao")[i]) + "</td><td>" + fmt1.format(col("beneficios")[i]) +
+      "</td><td>" + fmt1.format(col("necessidade")[i]) + "</td><td>" + fmt1.format(col("cobertura_pct")[i]) +
+      "</td><td>" + (col("pct_pib_necessidade")[i] == null ? "–" : fmt2.format(col("pct_pib_necessidade")[i])) + "</td></tr>").join("") + "</tbody></table>";
+
+  const tip = document.getElementById("tip");
+  const hideTip = () => { tip.style.display = "none"; };
+  function posTip(host, svg, W, xPx, ev) {
+    const r = svg.getBoundingClientRect(), hr = host.getBoundingClientRect(), t = tip.getBoundingClientRect();
+    let left = xPx * r.width / W + hr.left + window.scrollX + 14;
+    if (left + t.width > window.scrollX + document.documentElement.clientWidth - 8) left -= t.width + 28;
+    tip.style.left = Math.max(8, left) + "px"; tip.style.top = Math.max(8, ev.clientY + window.scrollY - t.height / 2) + "px";
+  }
+  function escala(vals) {
+    const mx = Math.max(...vals), exp = Math.pow(10, Math.floor(Math.log10(mx))), f = mx / exp;
+    const passo = exp * (f > 6 ? 2 : f > 3 ? 1 : f > 1.5 ? 0.5 : 0.2);
+    return { passo, max: Math.ceil(mx / passo) * passo };
+  }
+  function eixos(svg, W, Ht, m, y, max, passo, xs) {
+    const g = el("g", { class: "eixo" }, svg);
+    for (let v = 0; v <= max + 1e-9; v += passo) {
+      el("line", { x1: m.l, x2: W - m.r, y1: y(v), y2: y(v), stroke: "var(--grid)", "stroke-width": 1 }, svg);
+      el("text", { x: m.l - 6, y: y(v) + 4, "text-anchor": "end" }, g).textContent = fmt0.format(v);
+    }
+    anos.forEach((a, i) => { if (a % 5 === 0 || i === anos.length - 1) el("text", { x: xs(i), y: Ht - m.b + 16, "text-anchor": "middle" }, g).textContent = a; });
+  }
+  function base(id, rotulo) {
+    const host = document.getElementById(id); host.querySelectorAll("svg").forEach(s => s.remove());
+    const W = Math.max(300, host.clientWidth), Ht = W < 520 ? 260 : 320, m = { l: 40, r: 92, t: 10, b: 24 };
+    const svg = el("svg", { viewBox: "0 0 " + W + " " + Ht, role: "img", "aria-label": rotulo });
+    host.insertBefore(svg, host.firstChild);
+    return { host, svg, W, Ht, m };
+  }
+
+  function linhas() {
+    const { host, svg, W, Ht, m } = base("c1", "Linhas por ano: arrecadação líquida do INSS e benefícios pagos, em R$ bilhões.");
+    const { passo, max } = escala([...col("arrecadacao"), ...col("beneficios")]);
+    const n = anos.length, xs = (i) => m.l + (W - m.l - m.r) * i / Math.max(1, n - 1), y = (v) => Ht - m.b - (Ht - m.t - m.b) * v / max;
+    eixos(svg, W, Ht, m, y, max, passo, xs);
+    S.forEach(([k, r, c]) => {
+      const v = col(k);
+      el("path", { d: v.map((a, i) => (i ? "L" : "M") + xs(i).toFixed(1) + " " + y(a).toFixed(1)).join(" "), fill: "none", stroke: "var(" + c + ")", "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }, svg);
+      el("circle", { cx: xs(n - 1), cy: y(v[n - 1]), r: 4, fill: "var(" + c + ")", stroke: "var(--surface)", "stroke-width": 2 }, svg);
+      const g = el("g", { class: "rot" }, svg);
+      el("text", { x: xs(n - 1) + 10, y: y(v[n - 1]) + 4 }, g).textContent = r.split(" ")[0];
+    });
+    const guia = el("line", { y1: m.t, y2: Ht - m.b, stroke: "var(--text-3)", "stroke-width": 1, "stroke-dasharray": "3 3", visibility: "hidden" }, svg);
+    const alvo = el("rect", { x: m.l, y: m.t, width: W - m.l - m.r, height: Ht - m.t - m.b, fill: "transparent" }, svg);
+    alvo.addEventListener("pointermove", (ev) => {
+      const r = svg.getBoundingClientRect(), px = (ev.clientX - r.left) * W / r.width;
+      const i = Math.max(0, Math.min(n - 1, Math.round((px - m.l) / ((W - m.l - m.r) / Math.max(1, n - 1)))));
+      guia.setAttribute("x1", xs(i)); guia.setAttribute("x2", xs(i)); guia.setAttribute("visibility", "visible");
+      tip.innerHTML = "<b>" + anos[i] + "</b>" + S.map(([k, r2, c]) => '<div><span><i style="background:var(' + c + ')"></i>' + r2 + '</span><span class="v">' + fmt1.format(col(k)[i]) + "</span></div>").join("") +
+        '<div><span>Diferença</span><span class="v">' + fmt1.format(col("necessidade")[i]) + "</span></div>";
+      tip.style.display = "block"; posTip(host, svg, W, xs(i), ev);
+    });
+    alvo.addEventListener("pointerleave", () => { guia.setAttribute("visibility", "hidden"); hideTip(); });
+  }
+
+  function colunas() {
+    const { host, svg, W, Ht, m } = base("c2", "Colunas por ano com a diferença entre benefícios e arrecadação do INSS, em R$ bilhões.");
+    const v = col("necessidade"), n = anos.length;
+    const { passo, max } = escala(v);
+    const slot = (W - m.l - m.r) / n, bw = Math.max(4, slot * 0.7), xc = (i) => m.l + slot * i + slot / 2, y = (a) => Ht - m.b - (Ht - m.t - m.b) * a / max;
+    eixos(svg, W, Ht, m, y, max, passo, xc);
+    v.forEach((a, i) => {
+      const h = Math.max(0, y(0) - y(a)), r = Math.min(4, bw / 2, h);
+      el("path", { d: "M" + (xc(i) - bw / 2) + " " + y(0) + "V" + (y(a) + r) + "Q" + (xc(i) - bw / 2) + " " + y(a) + " " + (xc(i) - bw / 2 + r) + " " + y(a) + "H" + (xc(i) + bw / 2 - r) + "Q" + (xc(i) + bw / 2) + " " + y(a) + " " + (xc(i) + bw / 2) + " " + (y(a) + r) + "V" + y(0) + "Z", fill: "var(--s2)" }, svg);
+    });
+    const guia = el("rect", { y: m.t, height: Ht - m.t - m.b, width: slot, fill: "var(--text)", opacity: 0.06, visibility: "hidden" }, svg);
+    const alvo = el("rect", { x: m.l, y: m.t, width: W - m.l - m.r, height: Ht - m.t - m.b, fill: "transparent" }, svg);
+    alvo.addEventListener("pointermove", (ev) => {
+      const r = svg.getBoundingClientRect(), px = (ev.clientX - r.left) * W / r.width;
+      const i = Math.max(0, Math.min(n - 1, Math.floor((px - m.l) / slot)));
+      guia.setAttribute("x", xc(i) - slot / 2); guia.setAttribute("visibility", "visible");
+      const p = col("pct_pib_necessidade")[i];
+      tip.innerHTML = "<b>" + anos[i] + " · R$ " + fmt1.format(v[i]) + " bi</b>" +
+        "<div><span>Cobertura pela arrecadação</span><span class=\"v\">" + fmt1.format(col("cobertura_pct")[i]) + "%</span></div>" +
+        (p == null ? "" : "<div><span>% do PIB</span><span class=\"v\">" + fmt2.format(p) + "%</span></div>");
+      tip.style.display = "block"; posTip(host, svg, W, xc(i), ev);
+    });
+    alvo.addEventListener("pointerleave", () => { guia.setAttribute("visibility", "hidden"); hideTip(); });
+  }
+
+  function desenhar() { linhas(); colunas(); }
+  desenhar();
+  let t; window.addEventListener("resize", () => { clearTimeout(t); t = setTimeout(desenhar, 120); });
+})();
+</script>
+</body>
+</html>
