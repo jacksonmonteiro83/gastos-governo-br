@@ -26,6 +26,6 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add docs/data.js
-          git diff --cached --quiet || (git commit -m "Atualiza dados do dashboard" && git push)
+          git diff --cached --quiet || (git commit -m "Atualiza dados do dashboard" && git pull --rebase && git push)
       # dbt por último: uma falha nele não impede a publicação dos dados acima.
       - run: make build

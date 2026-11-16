@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cartão corporativo do governo federal</title>
+<meta name="description" content="Quanto o governo gasta no cartão corporativo (CPGF), quanto está sob sigilo e quem recebe, desde 2013, corrigido pelo IPCA.">
+<link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+<main>
+  <nav class="menu" aria-label="Seções">
+    <a href="index.html">Visão geral</a>
+    <a href="cartao.html" aria-current="page">Cartão corporativo</a>
+  </nav>
+  <header>
+    <div>
+      <h1>Cartão corporativo do governo federal</h1>
+      <p class="sub" id="sub"></p>
+    </div>
+    <button class="tema" id="tema" type="button" aria-label="Alternar tema claro e escuro">Tema</button>
+  </header>
+
+  <div id="vazio" class="aviso" hidden>
+    Os dados deste painel ainda não foram gerados. No GitHub, rode o workflow <b>Atualizar CPGF</b> (aba Actions) e recarregue a página.
+  </div>
+
+  <div id="conteudo" hidden>
+    <div class="hero">
+      <div class="num" id="hero-num"></div>
+      <p class="leg" id="hero-leg"></p>
+    </div>
+    <div class="kpis" id="kpis"></div>
+
+    <section class="card">
+      <h2>Quanto se gasta por ano, e em quê</h2>
+      <p class="nota">R$ milhões de <span class="ref"></span>, anos completos. "Sigilo" são transações em que o governo não divulga data nem favorecido.</p>
+      <ul class="legenda" id="leg1"></ul>
+      <div class="chart" id="c1"></div>
+      <details><summary>Ver dados em tabela</summary><div class="tabela" id="t1"></div></details>
+    </section>
+
+    <section class="card">
+      <h2>Órgãos que mais gastam</h2>
+      <p class="nota">Órgão superior, total desde <span id="desde"></span>, em R$ milhões de <span class="ref"></span>.</p>
+      <div class="barras" id="orgaos"></div>
+    </section>
+
+    <section class="card">
+      <h2>Empresas que mais recebem</h2>
+      <p class="nota">Só empresas identificadas (CNPJ). Intermediadoras de pagamento aparecem como favorecido no lugar do comércio final.</p>
+      <div class="barras" id="empresas"></div>
+    </section>
+
+    <footer>
+      <p><b>Como ler.</b> Cartão de Pagamento do Governo Federal (CPGF): usado pelo próprio governo em despesas de suprimento de fundos. Valores corrigidos pelo IPCA até o último mês disponível, usando o mês do extrato como referência.</p>
+      <p><b>Privacidade.</b> O painel não mostra portadores do cartão nem pessoas físicas ou MEIs que receberam pagamentos. Só órgãos e empresas.</p>
+      <p><b>Fonte:</b> <a href="https://portaldatransparencia.gov.br/download-de-dados/cpgf/">Portal da Transparência (CGU)</a>. Código e método: <a href="https://github.com/jacksonmonteiro83/gastos-governo-br">github.com/jacksonmonteiro83/gastos-governo-br</a>.</p>
+    </footer>
+  </div>
+</main>
+<div class="tip" id="tip"></div>
+
+<script src="cpgf_data.js" onerror="void 0"></script>
+<script>
+(function () {
+  const D = window.CPGF;
+  const raiz = document.documentElement;
+  document.getElementById("tema").addEventListener("click", () => {
+    const escuro = raiz.dataset.theme ? raiz.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+    raiz.dataset.theme = escuro ? "light" : "dark";
+  });
+  if (!D) { document.getElementById("vazio").hidden = false; return; }
+  document.getElementById("conteudo").hidden = false;
+
+  const fmt0 = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 });
+  const fmt1 = new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  const MESES = ["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
+  const mesAno = (s) => { const [a, m] = s.split("-"); return MESES[+m - 1] + "/" + a; };
+  const mi = (v) => v / 1e6;
+  const NS = "http://www.w3.org/2000/svg";
+  const el = (n, a, p) => { const e = document.createElementNS(NS, n); for (const k in a) e.setAttribute(k, a[k]); if (p) p.appendChild(e); return e; };
+
+  const H = D.destaques, ref = H.ano_referencia;
+  document.querySelectorAll(".ref").forEach(e => e.textContent = mesAno(D.ultimo_mes));
+  document.getElementById("desde").textContent = mesAno(D.primeiro_mes);
+  document.getElementById("sub").textContent = "CPGF, " + mesAno(D.primeiro_mes) + " a " + mesAno(D.ultimo_mes) + " · valores corrigidos pelo IPCA";
+  document.getElementById("hero-num").textContent = "R$ " + fmt0.format(mi(H.total_real)) + " mi";
+  document.getElementById("hero-leg").textContent =
+    "gastos no cartão corporativo desde " + mesAno(D.primeiro_mes) + ", em valores de hoje. " +
+    fmt1.format(H.sigilo_pct) + "% disso está sob sigilo, sem data nem favorecido divulgados.";
+  document.getElementById("kpis").innerHTML = [
+    [fmt1.format(H.ano_ref_sigilo_pct) + "%", "do valor de " + ref + " está sob sigilo"],
+    [fmt1.format(H.ano_ref_saque_pct) + "%", "do valor de " + ref + " foi saque em dinheiro"],
+    ["R$ " + fmt0.format(mi(H.ano_ref_total)) + " mi", "gastos em " + ref + " (" + fmt0.format(D.transacoes[D.anos.indexOf(ref)]) + " transações)"],
+  ].map(([v, l]) => '<div class="kpi"><div class="v">' + v + '</div><div class="l">' + l + '</div></div>').join("");
+
+  // ---- colunas empilhadas: compras, saques, sigilo (anos completos) ----
+  const idx = D.anos.map((_, i) => i).filter(i => D.meses[i] === 12);
+  const anos = idx.map(i => D.anos[i]);
+  const S = [["compra", "Compras", "--s1"], ["saque", "Saques em dinheiro", "--s2"], ["sigilo", "Sob sigilo", "--s3"]];
+  const val = (k) => idx.map(i => mi(D[k][i]));
+  document.getElementById("leg1").innerHTML = S.map(([k, r, c]) => '<li><i style="background:var(' + c + ')"></i>' + r + '</li>').join("");
+  document.getElementById("t1").innerHTML = "<table><thead><tr><th>Ano</th>" + S.map(s => "<th>" + s[1] + "</th>").join("") +
+    "<th>Total</th></tr></thead><tbody>" + anos.map((a, i) => "<tr><td>" + a + "</td>" +
+    S.map(([k]) => "<td>" + fmt1.format(val(k)[i]) + "</td>").join("") +
+    "<td>" + fmt1.format(S.reduce((s, [k]) => s + val(k)[i], 0)) + "</td></tr>").join("") + "</tbody></table>";
+
+  const tip = document.getElementById("tip");
+  const hideTip = () => { tip.style.display = "none"; };
+  function colunas() {
+    const host = document.getElementById("c1"); host.querySelectorAll("svg").forEach(s => s.remove());
+    if (!anos.length) { host.textContent = "Ainda não há anos completos."; return; }
+    const W = Math.max(300, host.clientWidth), Ht = W < 520 ? 260 : 320, m = { l: 40, r: 6, t: 10, b: 24 };
+    const svg = el("svg", { viewBox: "0 0 " + W + " " + Ht, role: "img",
+      "aria-label": "Colunas empilhadas por ano com compras, saques em dinheiro e valores sob sigilo, em R$ milhões." });
+    host.insertBefore(svg, host.firstChild);
+    const tot = anos.map((_, i) => S.reduce((s, [k]) => s + val(k)[i], 0));
+    const mx = Math.max(...tot), exp = Math.pow(10, Math.floor(Math.log10(mx))), f = mx / exp;
+    const passo = exp * (f > 6 ? 2 : f > 3 ? 1 : f > 1.5 ? 0.5 : 0.2);
+    const max = Math.ceil(Math.max(...tot) / passo) * passo;
+    const slot = (W - m.l - m.r) / anos.length, bw = Math.max(6, slot * 0.7);
+    const xc = (i) => m.l + slot * i + slot / 2, y = (v) => Ht - m.b - (Ht - m.t - m.b) * v / max;
+    const g = el("g", { class: "eixo" }, svg);
+    for (let v = 0; v <= max + 1e-9; v += passo) {
+      el("line", { x1: m.l, x2: W - m.r, y1: y(v), y2: y(v), stroke: "var(--grid)", "stroke-width": 1 }, svg);
+      el("text", { x: m.l - 6, y: y(v) + 4, "text-anchor": "end" }, g).textContent = fmt0.format(v);
+    }
+    anos.forEach((a, i) => { if (anos.length < 9 || a % 2 === 0) el("text", { x: xc(i), y: Ht - m.b + 16, "text-anchor": "middle" }, g).textContent = a; });
+    anos.forEach((_, i) => {
+      let acc = 0;
+      S.forEach(([k, , c]) => {
+        const v = val(k)[i], y0 = y(acc), y1 = y(acc + v); acc += v;
+        el("rect", { x: xc(i) - bw / 2, y: y1, width: bw, height: Math.max(0, y0 - y1), fill: "var(" + c + ")", stroke: "var(--surface)", "stroke-width": 2 }, svg);
+      });
+    });
+    const guia = el("rect", { y: m.t, height: Ht - m.t - m.b, width: slot, fill: "var(--text)", opacity: 0.06, visibility: "hidden" }, svg);
+    const alvo = el("rect", { x: m.l, y: m.t, width: W - m.l - m.r, height: Ht - m.t - m.b, fill: "transparent" }, svg);
+    alvo.addEventListener("pointermove", (ev) => {
+      const r = svg.getBoundingClientRect(), px = (ev.clientX - r.left) * W / r.width;
+      const i = Math.max(0, Math.min(anos.length - 1, Math.floor((px - m.l) / slot)));
+      guia.setAttribute("x", xc(i) - slot / 2); guia.setAttribute("visibility", "visible");
+      tip.innerHTML = "<b>" + anos[i] + " · R$ " + fmt1.format(tot[i]) + " mi</b>" + S.map(([k, rot, c]) =>
+        '<div><span><i style="background:var(' + c + ')"></i>' + rot + '</span><span class="v">' + fmt1.format(val(k)[i]) +
+        " (" + fmt0.format(100 * val(k)[i] / tot[i]) + "%)</span></div>").join("");
+      tip.style.display = "block";
+      const hr = host.getBoundingClientRect(), t = tip.getBoundingClientRect();
+      let left = xc(i) * r.width / W + hr.left + window.scrollX + 14;
+      if (left + t.width > window.scrollX + document.documentElement.clientWidth - 8) left -= t.width + 28;
+      tip.style.left = Math.max(8, left) + "px"; tip.style.top = Math.max(8, ev.clientY + window.scrollY - t.height / 2) + "px";
+    });
+    alvo.addEventListener("pointerleave", () => { guia.setAttribute("visibility", "hidden"); hideTip(); });
+  }
+
+  // ---- barras horizontais (HTML) ----
+  function barras(id, itens) {
+    const max = Math.max(...itens.map(i => i.valor));
+    document.getElementById(id).innerHTML = itens.map(i =>
+      '<div class="barra" title="' + i.nome.replace(/"/g, "&quot;") + '"><span class="n">' + i.nome +
+      '</span><span class="t"><i style="width:' + (100 * i.valor / max).toFixed(1) + '%"></i></span><span class="v">' +
+      fmt1.format(mi(i.valor)) + '</span></div>').join("");
+  }
+  barras("orgaos", D.orgaos); barras("empresas", D.empresas);
+
+  colunas();
+  let t; window.addEventListener("resize", () => { clearTimeout(t); t = setTimeout(colunas, 120); });
+})();
+</script>
+</body>
+</html>

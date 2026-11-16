@@ -13,6 +13,7 @@ Projeto de dados abertos: para onde vai o dinheiro do governo federal, em valore
 | Fonte | Uso | Status |
 |---|---|---|
 | Banco Central (SGS) | IPCA (433), Selic mensal (4390), PIB 12m (4382) | implementado |
+| Portal da Transparência | Cartão corporativo (CPGF), mensal desde 2013 | implementado (`pipeline/cpgf.py`, `pipeline/agregar_cpgf.py`) |
 | Portal da Transparência | Despesas (empenho, liquidação, pagamento) | a implementar (`pipeline/transparencia.py`) |
 | Tesouro Transparente | Resultado do Tesouro Nacional (desde 1997) | implementado (`pipeline/tesouro.py`): 11 abas mensais em formato longo, valores correntes e em R$ de jul/2026 (IPCA) |
 
@@ -46,3 +47,6 @@ make test     # testes Python
 - Juros = juros nominais do governo central (critério abaixo-da-linha, fonte BCB), com o sinal invertido. É valor líquido, não o bruto do orçamento.
 - Saúde e educação = só despesas do Executivo sujeitas à programação financeira (linhas 4.4.1.3, 4.4.2.1, 4.4.1.4, 4.4.2.2 da tabela 1.2-A). Folha de pessoal e Fundeb ficam em outras linhas.
 - Saúde, educação e investimento só existem na série a partir de 2008; antes disso a fonte traz zeros, que viram nulos.
+
+## Cartão corporativo (CPGF)
+Página `docs/cartao.html`, alimentada por `docs/cpgf_data.js`. O workflow **Atualizar CPGF** (manual ou mensal) baixa 2013 até hoje, consolida em Parquet, corrige pelo IPCA e publica os dados. Enquanto ele não rodar, a página mostra um aviso. Privacidade: portadores, pessoas físicas e MEIs não entram na saída.

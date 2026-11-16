@@ -5,77 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Para onde vai o dinheiro do governo federal</title>
 <meta name="description" content="Juros, previdência, pessoal, saúde, educação e investimento do governo central desde 1997, em valores corrigidos pelo IPCA.">
-<style>
-  :root {
-    color-scheme: light;
-    --surface: #fcfcfb; --surface-2: #f4f3f0; --border: #e2e1dc; --grid: #ecebe7;
-    --text: #0b0b0b; --text-2: #52514e; --text-3: #6f6e69;
-    --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100;
-    --s5: #e87ba4; --s6: #008300; --s7: #6250d6; --s8: #e34948;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root:where(:not([data-theme="light"])) {
-      color-scheme: dark;
-      --surface: #1a1a19; --surface-2: #232321; --border: #383835; --grid: #2a2a28;
-      --text: #f0efec; --text-2: #c3c2b7; --text-3: #a09f96;
-      --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
-      --s5: #d55181; --s6: #0ca30c; --s7: #9085e9; --s8: #e66767;
-    }
-  }
-  :root[data-theme="dark"] {
-    color-scheme: dark;
-    --surface: #1a1a19; --surface-2: #232321; --border: #383835; --grid: #2a2a28;
-    --text: #f0efec; --text-2: #c3c2b7; --text-3: #a09f96;
-    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
-    --s5: #d55181; --s6: #0ca30c; --s7: #9085e9; --s8: #e66767;
-  }
-  * { box-sizing: border-box; }
-  body { margin: 0; background: var(--surface); color: var(--text);
-         font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-  main { max-width: 960px; margin: 0 auto; padding: 24px 16px 64px; }
-  header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
-  h1 { font-size: 1.5rem; line-height: 1.25; margin: 0 0 4px; }
-  .sub { color: var(--text-2); font-size: .9rem; margin: 0; }
-  button.tema { background: var(--surface-2); color: var(--text-2); border: 1px solid var(--border);
-                border-radius: 8px; padding: 6px 10px; font: inherit; font-size: .85rem; cursor: pointer; }
-  .hero { margin: 32px 0 24px; }
-  .hero .num { font-size: clamp(2.6rem, 9vw, 4rem); font-weight: 700; line-height: 1.05; letter-spacing: -.02em; }
-  .hero .leg { color: var(--text-2); margin: 6px 0 0; max-width: 40em; }
-  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 40px; }
-  .kpi { background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
-  .kpi .v { font-size: 1.6rem; font-weight: 700; line-height: 1.2; }
-  .kpi .l { color: var(--text-2); font-size: .85rem; margin-top: 2px; }
-  section.card { margin-bottom: 40px; }
-  h2 { font-size: 1.1rem; margin: 0 0 4px; }
-  .nota { color: var(--text-2); font-size: .85rem; margin: 0 0 12px; }
-  .legenda { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0 0 8px; padding: 0; list-style: none;
-             font-size: .85rem; color: var(--text-2); }
-  .legenda i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
-  .chart { position: relative; }
-  .chart svg { display: block; width: 100%; height: auto; overflow: visible; }
-  .tip { position: absolute; pointer-events: none; background: var(--surface); color: var(--text);
-         border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: .8rem;
-         box-shadow: 0 4px 14px rgba(0,0,0,.14); white-space: nowrap; display: none; z-index: 2; }
-  .tip b { display: block; margin-bottom: 4px; }
-  .tip div { display: flex; justify-content: space-between; gap: 14px; }
-  .tip i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 6px; }
-  .tip .v { font-variant-numeric: tabular-nums; color: var(--text-2); }
-  details { margin-top: 10px; font-size: .85rem; color: var(--text-2); }
-  summary { cursor: pointer; }
-  .tabela { overflow-x: auto; margin-top: 8px; max-height: 360px; overflow-y: auto; }
-  table { border-collapse: collapse; font-size: .8rem; font-variant-numeric: tabular-nums; }
-  th, td { padding: 4px 10px; text-align: right; border-bottom: 1px solid var(--border); white-space: nowrap; }
-  th:first-child, td:first-child { text-align: left; position: sticky; left: 0; background: var(--surface); }
-  thead th { position: sticky; top: 0; background: var(--surface); }
-  footer { color: var(--text-2); font-size: .82rem; border-top: 1px solid var(--border); padding-top: 16px; }
-  footer p { margin: 0 0 8px; }
-  a { color: var(--s1); }
-  .eixo text { fill: var(--text-3); font-size: 11px; }
-  .rot text { fill: var(--text-2); font-size: 12px; }
-</style>
+<link rel="stylesheet" href="estilo.css">
 </head>
 <body>
 <main>
+  <nav class="menu" aria-label="Seções">
+    <a href="index.html" aria-current="page">Visão geral</a>
+    <a href="cartao.html">Cartão corporativo</a>
+  </nav>
   <header>
     <div>
       <h1>Para onde vai o dinheiro do governo federal</h1>
