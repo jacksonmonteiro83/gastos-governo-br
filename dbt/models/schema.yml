@@ -13,3 +13,57 @@ models:
         tests: [not_null, unique]
       - name: fator_para_hoje
         tests: [not_null]
+
+  - name: stg_tesouro_rtn
+    description: Resultado do Tesouro Nacional em formato longo (R$ milhões).
+    columns:
+      - name: tabela
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['1.1', '1.1-A', '1.2', '1.2-A', '1.3', '1.3-A', '1.4', '1.4-A', '1.5', '1.5-A', '1.6']
+      - name: data
+        tests: [not_null]
+
+  - name: mart_rgps_anual
+    description: Arrecadação líquida x benefícios do INSS (RGPS), R$ bi constantes.
+    columns:
+      - name: ano
+        tests: [not_null, unique]
+      - name: cobertura_pct
+        tests: [not_null]
+
+  - name: mart_juros_anual
+    description: Juros nominais do governo central por ano, R$ bi constantes.
+    columns:
+      - name: ano
+        tests: [not_null, unique]
+      - name: juros_bi
+        tests: [not_null]
+
+  - name: stg_cpgf
+    description: CPGF sem portadores e sem dados de pessoa física.
+    columns:
+      - name: tipo_transacao
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['compra', 'saque', 'sigilo', 'outro']
+      - name: favorecido_tipo
+        tests:
+          - accepted_values:
+              values: ['pj', 'mei', 'pf', 'sem_informacao']
+              config:
+                where: "favorecido_tipo is not null"
+
+  - name: mart_cpgf_mensal
+    columns:
+      - name: mes
+        tests: [not_null]
+      - name: valor_real
+        tests: [not_null]
+
+  - name: mart_cpgf_anual
+    columns:
+      - name: ano
+        tests: [not_null, unique]

@@ -16,7 +16,8 @@ Para onde vai o dinheiro do governo federal, em valores reais (corrigidos pelo I
 
 ## Stack
 - **Python / pandas** para ingestão (APIs e planilhas) e agregação
-- **Parquet** como formato intermediário; **DuckDB + dbt (dbt-duckdb)** para a camada analítica (em construção)
+- **Parquet** como formato intermediário; **DuckDB + dbt (dbt-duckdb)** para a camada analítica: staging, marts (previdência, juros, cartão) e testes de dados, incluindo um teste de privacidade do cartão
+- **Conferência cruzada:** `pipeline/conferir_dbt.py` compara o mart de previdência do dbt (SQL) com o painel publicado pelo Python (pandas); a conta feita de duas formas tem que bater
 - **GitHub Actions** para atualização diária, com commits do bot e testes antes de publicar
 - **Painéis estáticos** (GitHub Pages) em `docs/`: HTML + SVG puro, sem dependências, com tooltip, tabela de dados e tema claro/escuro
 
@@ -32,7 +33,7 @@ Para onde vai o dinheiro do governo federal, em valores reais (corrigidos pelo I
 ## Estrutura
 ```
 pipeline/     ingestão e agregação (gera Parquet em data/raw e os .js dos painéis)
-dbt/          modelos SQL (staging e marts) e testes
+dbt/          modelos SQL (staging, marts), testes de dados (schema.yml e tests/) e macro de leitura de Parquet
 tests/        testes Python (pytest)
 docs/         site estático: index, previdencia, cartao + dados gerados (*_data.js) + img/
 .github/      workflows: atualização diária, CPGF, validação dos juros, inspeções
@@ -46,7 +47,9 @@ python -m pipeline.agregar                   # docs/data.js (visão geral)
 python -m pipeline.agregar_previdencia       # docs/previdencia_data.js
 python -m pipeline.agregar_demografia        # docs/demografia_data.js
 make test                                    # testes Python
-make build                                   # dbt
+make build                                   # dbt (tudo, exceto o cartão)
+make build-cpgf                              # dbt do cartão (precisa do Parquet do CPGF)
+make conferir                                # dbt x painel
 ```
 Para publicar: Settings → Pages → Deploy from a branch → `main` / `/docs`. Para ver local, sirva `docs/` (`python -m http.server`) e abra no navegador.
 
@@ -59,7 +62,7 @@ Para publicar: Settings → Pages → Deploy from a branch → `main` / `/docs`.
 
 ## Limitações conhecidas
 - O Portal da Transparência limita downloads seguidos: a primeira carga completa do cartão (2013 até hoje) precisou de várias execuções do workflow, que guarda os ZIPs já baixados em cache. As atualizações mensais seguintes são rápidas.
-- O dbt tem só o modelo de IPCA; os modelos do Tesouro e do CPGF ainda não foram escritos.
+- Os modelos dbt foram escritos e conferidos por leitura e compilação do Jinja, mas a primeira execução real é a do workflow no GitHub.
 
 ## Atualização
 O workflow **Atualizar dados** roda todo dia, baixa as fontes, executa os testes e publica os `*_data.js`. O workflow **Atualizar CPGF** roda no dia 5 de cada mês, ou manualmente.
