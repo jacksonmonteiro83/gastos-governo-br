@@ -69,8 +69,29 @@ def inspecionar() -> None:
         _tentar(f"Amostra SIDRA da tabela {t}", lambda t=t: amostra(t))
 
 
+FTP = "https://ftp.ibge.gov.br/Projecao_da_Populacao/"
+
+
+def listar_ftp(url: str = FTP, nivel: int = 0, maximo: int = 2) -> None:
+    """Lista recursivamente (até `maximo` níveis) os arquivos publicados pelo IBGE."""
+    import re
+
+    r = requests.get(url, timeout=60)
+    print(("  " * nivel) + url, "->", r.status_code)
+    if r.status_code != 200:
+        return
+    for href in re.findall(r'href="([^"?][^"]*)"', r.text):
+        if href.startswith("/") or href.startswith(".."):
+            continue
+        print(("  " * (nivel + 1)) + href)
+        if href.endswith("/") and nivel < maximo:
+            _tentar(url + href, lambda u=url + href: listar_ftp(u, nivel + 1, maximo))
+
+
 if __name__ == "__main__":
-    if "--inspecionar" in sys.argv:
+    if "--ftp" in sys.argv:
+        _tentar("Arquivos de projeção no servidor do IBGE", listar_ftp)
+    elif "--inspecionar" in sys.argv:
         inspecionar()
     else:
         print(__doc__)

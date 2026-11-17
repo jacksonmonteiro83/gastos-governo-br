@@ -13,8 +13,8 @@ jobs:
           python-version: "3.12"
           cache: pip
       - run: pip install requests
-      - name: Inspecionar tabelas de projeção
-        run: python -m pipeline.ibge --inspecionar | tee ibge-inspecao.txt
+      - name: Listar arquivos de projeção do IBGE
+        run: python -m pipeline.ibge --ftp | tee ibge-inspecao.txt
       - uses: actions/upload-artifact@v4
         with:
           name: ibge-inspecao
