@@ -12,7 +12,7 @@ Para onde vai o dinheiro do governo federal, em valores reais (corrigidos pelo I
 - **Juros:** R$ 12,81 tri pagos em juros da dívida desde 1997, em valores de hoje, 20,8% de tudo que o governo central gastou. Só em 2025, R$ 933 bi (R$ 2,56 bi por dia), 10,7× o investimento federal.
 - **Previdência (INSS/RGPS):** em 2025 a arrecadação líquida cobriu 69,1% dos benefícios; o Tesouro pagou a diferença, R$ 333 bi (2,5% do PIB). Em 1997 a cobertura era de 94%. Desde 2010, já descontada a inflação, os benefícios cresceram 72% e a arrecadação, 43%. A diferença chegou a 3,4% do PIB em 2020 e desde então recuou.
 - **Envelhecimento:** a página de Previdência cruza a conta com a projeção de população do IBGE (revisão 2024): idosos de 65+ para cada 100 pessoas de 15 a 64 anos, de 2000 a 2070.
-- **Cartão corporativo:** quase metade do valor gasto nos anos já processados está sob sigilo, sem data nem favorecido divulgados.
+- **Cartão corporativo (jan/2013 a out/2026):** R$ 1,40 bi gastos, em valores de hoje. 48,1% do total está sob sigilo, sem data nem favorecido divulgados (41,4% em 2025). Os saques em espécie são 10,1% do total.
 
 ## Stack
 - **Python / pandas** para ingestão (APIs e planilhas) e agregação
@@ -58,7 +58,7 @@ Para publicar: Settings → Pages → Deploy from a branch → `main` / `/docs`.
 - **Cartão corporativo:** valores corrigidos pelo IPCA usando o mês do extrato. Privacidade: portadores, pessoas físicas e MEIs não entram na saída, só órgãos e empresas.
 
 ## Limitações conhecidas
-- A cobertura do cartão corporativo no site ainda não vai até o mês atual: os dados publicados hoje cobrem de jan/2013 a jul/2015 e estou investigando os meses seguintes.
+- O Portal da Transparência limita downloads seguidos: a primeira carga completa do cartão (2013 até hoje) precisou de várias execuções do workflow, que guarda os ZIPs já baixados em cache. As atualizações mensais seguintes são rápidas.
 - O dbt tem só o modelo de IPCA; os modelos do Tesouro e do CPGF ainda não foram escritos.
 
 ## Atualização
