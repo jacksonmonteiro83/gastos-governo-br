@@ -88,8 +88,49 @@ def listar_ftp(url: str = FTP, nivel: int = 0, maximo: int = 2) -> None:
             _tentar(url + href, lambda u=url + href: listar_ftp(u, nivel + 1, maximo))
 
 
+BASE_2024 = FTP + "Projecao_da_Populacao_2024/"
+ARQUIVOS_2024 = [
+    "projecoes_2024_tab3_grupos_etarios_especificos.xlsx",
+    "projecoes_2024_tab4_indicadores.xlsx",
+    "projecoes_2024_tab2_grupo_quinquenal.xlsx",
+]
+
+
+def baixar_2024(nome: str):
+    from pathlib import Path
+
+    destino = Path("data/raw/ibge") / nome
+    destino.parent.mkdir(parents=True, exist_ok=True)
+    if not destino.exists():
+        r = requests.get(BASE_2024 + nome, timeout=300)
+        r.raise_for_status()
+        destino.write_bytes(r.content)
+    return destino
+
+
+def inspecionar_xlsx() -> None:
+    """Mostra abas, dimensões e as primeiras linhas de cada planilha da revisão 2024."""
+    import pandas as pd
+
+    for nome in ARQUIVOS_2024:
+        def um(nome=nome):
+            arq = baixar_2024(nome)
+            xl = pd.ExcelFile(arq)
+            print(nome, "| abas:", xl.sheet_names)
+            for aba in xl.sheet_names[:3]:
+                df = xl.parse(aba, header=None)
+                print(f"--- aba '{aba}' {df.shape[0]}x{df.shape[1]}")
+                with pd.option_context("display.width", 250, "display.max_columns", 14, "display.max_colwidth", 38):
+                    print(df.head(14).iloc[:, :12].to_string())
+                    print("   ...")
+                    print(df.iloc[:, :6].tail(3).to_string())
+        _tentar(nome, um)
+
+
 if __name__ == "__main__":
-    if "--ftp" in sys.argv:
+    if "--xlsx" in sys.argv:
+        inspecionar_xlsx()
+    elif "--ftp" in sys.argv:
         _tentar("Arquivos de projeção no servidor do IBGE", listar_ftp)
     elif "--inspecionar" in sys.argv:
         inspecionar()

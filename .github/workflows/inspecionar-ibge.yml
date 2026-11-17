@@ -12,9 +12,9 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
-      - run: pip install requests
-      - name: Listar arquivos de projeção do IBGE
-        run: python -m pipeline.ibge --ftp | tee ibge-inspecao.txt
+      - run: pip install requests pandas openpyxl
+      - name: Inspecionar planilhas da projeção 2024
+        run: python -m pipeline.ibge --xlsx | tee ibge-inspecao.txt
       - uses: actions/upload-artifact@v4
         with:
           name: ibge-inspecao
