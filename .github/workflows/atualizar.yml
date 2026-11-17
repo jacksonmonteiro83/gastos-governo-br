@@ -22,11 +22,13 @@ jobs:
       - run: make ingest
       - run: python -m pipeline.agregar
       - run: python -m pipeline.agregar_previdencia
+      - name: Demografia (IBGE, revisão 2024)
+        run: python -m pipeline.agregar_demografia
       - name: Publicar dados do dashboard
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs/data.js docs/previdencia_data.js
+          git add docs/data.js docs/previdencia_data.js docs/demografia_data.js
           git diff --cached --quiet || (git commit -m "Atualiza dados do dashboard" && git pull --rebase && git push)
       # dbt por último: uma falha nele não impede a publicação dos dados acima.
       - run: make build
