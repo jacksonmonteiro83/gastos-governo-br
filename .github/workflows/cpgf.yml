@@ -19,14 +19,21 @@ jobs:
           python-version: "3.12"
           cache: pip
       - run: pip install -r requirements.txt
-      - name: Cache dos ZIPs mensais
-        uses: actions/cache@v4
+      - name: Restaurar cache dos ZIPs mensais
+        id: cache
+        uses: actions/cache/restore@v4
         with:
           path: data/raw/cpgf
           key: cpgf-${{ github.run_id }}
           restore-keys: cpgf-
       - run: python -m pipeline.bcb          # IPCA para corrigir os valores
       - run: python -m pipeline.cpgf --tudo  # baixa 2013 até hoje e consolida
+      - name: Salvar cache dos ZIPs mensais (mesmo se falhar ou estourar o tempo)
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: data/raw/cpgf
+          key: cpgf-${{ github.run_id }}
       - run: python -m pipeline.agregar_cpgf
       - name: Publicar dados do painel
         run: |
