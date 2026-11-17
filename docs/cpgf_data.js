@@ -1,5 +1,5 @@
 window.CPGF = {
- "ultimo_mes": "2022-04",
+ "ultimo_mes": "2024-05",
  "primeiro_mes": "2013-01",
  "anos": [
   2013,
@@ -11,7 +11,9 @@ window.CPGF = {
   2019,
   2020,
   2021,
-  2022
+  2022,
+  2023,
+  2024
  ],
  "meses": [
   12,
@@ -23,7 +25,9 @@ window.CPGF = {
   12,
   12,
   12,
-  4
+  12,
+  12,
+  5
  ],
  "compra": [
   52234746.0,
@@ -35,7 +39,9 @@ window.CPGF = {
   31630559.0,
   29039575.0,
   25958241.0,
-  7626899.0
+  42552262.0,
+  42918391.0,
+  14554873.0
  ],
  "saque": [
   15725080.0,
@@ -47,7 +53,9 @@ window.CPGF = {
   7393413.0,
   5947922.0,
   5401859.0,
-  2265178.0
+  12130486.0,
+  10101702.0,
+  2536315.0
  ],
  "sigilo": [
   59815800.0,
@@ -59,7 +67,9 @@ window.CPGF = {
   38082520.0,
   42550296.0,
   44320495.0,
-  13317531.0
+  54213277.0,
+  51662356.0,
+  20831077.0
  ],
  "transacoes": [
   191491,
@@ -71,80 +81,88 @@ window.CPGF = {
   115443,
   80686,
   82985,
-  26021
+  136611,
+  134122,
+  45900
  ],
  "orgaos": [
   {
    "nome": "Presidência da República",
-   "valor": 247715076.0
+   "valor": 308856001.0
   },
   {
    "nome": "Ministério da Justiça e Segurança Pública",
-   "valor": 192900549.0
+   "valor": 258857306.0
   },
   {
    "nome": "Ministério do Planejamento e Orçamento",
-   "valor": 90188043.0
+   "valor": 115100427.0
   },
   {
    "nome": "Ministério da Educação",
-   "valor": 81713815.0
+   "valor": 101635149.0
   },
   {
    "nome": "Ministério da Defesa",
-   "valor": 64812915.0
+   "valor": 83101880.0
   },
   {
    "nome": "Ministério da Agricultura e Pecuária",
-   "valor": 27153578.0
-  },
-  {
-   "nome": "Ministério do Desenvolvimento Agrário e Agr",
-   "valor": 25064621.0
+   "valor": 31088063.0
   },
   {
    "nome": "Ministério da Saúde",
-   "valor": 24506423.0
+   "valor": 28857039.0
+  },
+  {
+   "nome": "Ministério do Desenvolvimento Agrário e Agr",
+   "valor": 28473285.0
   },
   {
    "nome": "Ministério da Fazenda",
-   "valor": 18956531.0
+   "valor": 25343614.0
   },
   {
    "nome": "Ministério do Trabalho e Emprego",
-   "valor": 15871960.0
+   "valor": 18243043.0
   }
  ],
  "empresas": [
   {
    "nome": "GOL LINHAS AEREAS S.A.",
    "cnpj": "07575651000159",
-   "valor": 2764173.0,
-   "transacoes": 2812
-  },
-  {
-   "nome": "AZUL LINHAS AEREAS BRASILEIRAS S.A.",
-   "cnpj": "09296295000160",
-   "valor": 2561207.0,
-   "transacoes": 2813
+   "valor": 4791315.0,
+   "transacoes": 3315
   },
   {
    "nome": "TAM LINHAS AEREAS S/A.",
    "cnpj": "02012862000160",
-   "valor": 2190607.0,
-   "transacoes": 2255
+   "valor": 4073727.0,
+   "transacoes": 2787
+  },
+  {
+   "nome": "AZUL LINHAS AEREAS BRASILEIRAS S.A.",
+   "cnpj": "09296295000160",
+   "valor": 3427979.0,
+   "transacoes": 3035
+  },
+  {
+   "nome": "PAGAR.ME S.A.",
+   "cnpj": "18727053000174",
+   "valor": 2951482.0,
+   "transacoes": 3839
   },
   {
    "nome": "MERCADO PAGO INSTITUICAO DE PAGAMENTO LTDA",
    "cnpj": "10573521000191",
-   "valor": 1669508.0,
-   "transacoes": 2091
+   "valor": 2858694.0,
+   "transacoes": 3792
   },
   {
    "nome": "FERRAGEM PARATI CONCEICAO LTDA",
    "cnpj": "05671436000126",
-   "valor": 1282239.0,
-   "transacoes": 1387
+   "valor": 1574702.0,
+   "transacoes": 1734
   },
   {
    "nome": "OCEANAIR LINHAS AEREAS S/A FALIDO",
@@ -155,36 +173,30 @@ window.CPGF = {
   {
    "nome": "STELO S.A.",
    "cnpj": "14625224000101",
-   "valor": 884211.0,
-   "transacoes": 1576
+   "valor": 890885.0,
+   "transacoes": 1596
+  },
+  {
+   "nome": "PRO ELETRO COMERCIAL LTDA",
+   "cnpj": "91269472000108",
+   "valor": 720647.0,
+   "transacoes": 688
   },
   {
    "nome": "UNIVERSO ONLINE S/A",
    "cnpj": "01109184000438",
    "valor": 710171.0,
    "transacoes": 1255
-  },
-  {
-   "nome": "SUMUP INSTITUICAO DE PAGAMENTO BRASIL LTDA",
-   "cnpj": "16668076000120",
-   "valor": 664011.0,
-   "transacoes": 974
-  },
-  {
-   "nome": "PRO ELETRO COMERCIAL LTDA",
-   "cnpj": "91269472000108",
-   "valor": 590029.0,
-   "transacoes": 570
   }
  ],
  "destaques": {
-  "total_real": 852145527.0,
-  "sigilo_pct": 49.9,
-  "saque_pct": 11.4,
-  "ano_referencia": 2021,
-  "ano_ref_total": 75680596.0,
-  "ano_ref_sigilo_pct": 58.6,
-  "ano_ref_saque_pct": 7.1,
-  "transacoes_total": 1244063
+  "total_real": 1080436658.0,
+  "sigilo_pct": 49.8,
+  "saque_pct": 11.1,
+  "ano_referencia": 2023,
+  "ano_ref_total": 104682449.0,
+  "ano_ref_sigilo_pct": 49.4,
+  "ano_ref_saque_pct": 9.6,
+  "transacoes_total": 1534675
  }
 };
