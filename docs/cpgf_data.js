@@ -1,160 +1,178 @@
 window.CPGF = {
- "ultimo_mes": "2017-11",
+ "ultimo_mes": "2020-02",
  "primeiro_mes": "2013-01",
  "anos": [
   2013,
   2014,
   2015,
   2016,
-  2017
+  2017,
+  2018,
+  2019,
+  2020
  ],
  "meses": [
   12,
   12,
   12,
   12,
-  11
+  12,
+  12,
+  12,
+  2
  ],
  "compra": [
   52234746.0,
   45899817.0,
   38948076.0,
   33196872.0,
-  28403884.0
+  32785776.0,
+  32978424.0,
+  31630559.0,
+  2913096.0
  ],
  "saque": [
   15725080.0,
   13620004.0,
   11971733.0,
   10368785.0,
-  9810099.0
+  11775637.0,
+  12441288.0,
+  7393413.0,
+  900397.0
  ],
  "sigilo": [
   59815800.0,
   66585742.0,
   49234739.0,
   41789103.0,
-  30812388.0
+  34730621.0,
+  34508794.0,
+  38082520.0,
+  4981153.0
  ],
  "transacoes": [
   191491,
   175578,
   150242,
   138241,
-  122220
+  140374,
+  143002,
+  115443,
+  9975
  ],
  "orgaos": [
   {
    "nome": "Presidência da República",
-   "valor": 141492515.0
+   "valor": 187643117.0
   },
   {
    "nome": "Ministério da Justiça e Segurança Pública",
-   "valor": 113958465.0
+   "valor": 151464656.0
   },
   {
    "nome": "Ministério do Planejamento e Orçamento",
-   "valor": 56652131.0
+   "valor": 80480779.0
   },
   {
    "nome": "Ministério da Educação",
-   "valor": 50138585.0
+   "valor": 68041238.0
   },
   {
    "nome": "Ministério da Defesa",
-   "valor": 38532080.0
-  },
-  {
-   "nome": "Ministério do Desenvolvimento Agrário e Agr",
-   "valor": 19093975.0
+   "valor": 53132992.0
   },
   {
    "nome": "Ministério da Agricultura e Pecuária",
-   "valor": 17494520.0
+   "valor": 23840095.0
+  },
+  {
+   "nome": "Ministério do Desenvolvimento Agrário e Agr",
+   "valor": 22247129.0
   },
   {
    "nome": "Ministério da Saúde",
-   "valor": 14007444.0
+   "valor": 18106834.0
   },
   {
    "nome": "Ministério do Trabalho e Emprego",
-   "valor": 11062332.0
+   "valor": 14138912.0
   },
   {
    "nome": "Ministério da Fazenda",
-   "valor": 10035115.0
+   "valor": 14054132.0
   }
  ],
  "empresas": [
   {
-   "nome": "AZUL LINHAS AEREAS BRASILEIRAS S.A.",
-   "cnpj": "09296295000160",
-   "valor": 1619134.0,
-   "transacoes": 1906
-  },
-  {
    "nome": "GOL LINHAS AEREAS S.A.",
    "cnpj": "07575651000159",
-   "valor": 1351922.0,
-   "transacoes": 1647
+   "valor": 2758996.0,
+   "transacoes": 2809
+  },
+  {
+   "nome": "AZUL LINHAS AEREAS BRASILEIRAS S.A.",
+   "cnpj": "09296295000160",
+   "valor": 2558002.0,
+   "transacoes": 2810
   },
   {
    "nome": "TAM LINHAS AEREAS S/A.",
    "cnpj": "02012862000160",
-   "valor": 1237945.0,
-   "transacoes": 1385
+   "valor": 2190607.0,
+   "transacoes": 2255
   },
   {
    "nome": "OCEANAIR LINHAS AEREAS S/A FALIDO",
    "cnpj": "02575829000148",
-   "valor": 922244.0,
-   "transacoes": 1365
-  },
-  {
-   "nome": "UNIVERSO ONLINE S/A",
-   "cnpj": "01109184000438",
-   "valor": 700599.0,
-   "transacoes": 1225
+   "valor": 1076085.0,
+   "transacoes": 1559
   },
   {
    "nome": "FERRAGEM PARATI CONCEICAO LTDA",
    "cnpj": "05671436000126",
-   "valor": 594239.0,
-   "transacoes": 612
+   "valor": 840766.0,
+   "transacoes": 910
   },
   {
-   "nome": "SUPERDELLI ATACADO E SUPERMERCADO S. A.",
-   "cnpj": "35881333000151",
-   "valor": 499589.0,
-   "transacoes": 278
+   "nome": "UNIVERSO ONLINE S/A",
+   "cnpj": "01109184000438",
+   "valor": 708037.0,
+   "transacoes": 1253
+  },
+  {
+   "nome": "STELO S.A.",
+   "cnpj": "14625224000101",
+   "valor": 608960.0,
+   "transacoes": 1207
   },
   {
    "nome": "PONTO TREZE COMERCIO E SERVICOS LTDA",
    "cnpj": "30853378000107",
-   "valor": 498476.0,
-   "transacoes": 138
+   "valor": 514714.0,
+   "transacoes": 151
   },
   {
-   "nome": "AUTO POSTO ESTONIA 3 LTDA.",
-   "cnpj": "59148239000156",
-   "valor": 320883.0,
-   "transacoes": 238
+   "nome": "SUPERDELLI ATACADO E SUPERMERCADO S. A.",
+   "cnpj": "35881333000151",
+   "valor": 509337.0,
+   "transacoes": 298
   },
   {
    "nome": "PRO ELETRO COMERCIAL LTDA",
    "cnpj": "91269472000108",
-   "valor": 280487.0,
-   "transacoes": 278
+   "valor": 403265.0,
+   "transacoes": 407
   }
  ],
  "destaques": {
-  "total_real": 508416869.0,
-  "sigilo_pct": 48.8,
-  "saque_pct": 12.1,
-  "ano_referencia": 2016,
-  "ano_ref_total": 85354760.0,
-  "ano_ref_sigilo_pct": 49.0,
-  "ano_ref_saque_pct": 12.1,
-  "transacoes_total": 777772
+  "total_real": 684512175.0,
+  "sigilo_pct": 48.2,
+  "saque_pct": 12.3,
+  "ano_referencia": 2019,
+  "ano_ref_total": 77106492.0,
+  "ano_ref_sigilo_pct": 49.4,
+  "ano_ref_saque_pct": 9.6,
+  "transacoes_total": 1064346
  }
 };
