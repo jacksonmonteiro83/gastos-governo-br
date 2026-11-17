@@ -11,7 +11,7 @@ import sys
 import requests
 
 AGREGADOS = "https://servicodados.ibge.gov.br/api/v3/agregados"
-CANDIDATAS = [7358, 6407, 1209]  # 7358: projeções (rev. 2024)? 1209: população por idade (censos)
+CANDIDATAS = [7360, 9109, 9110, 6407]  # 6407: estimativas 2012-2025; 7360: indicadores da projeção; 9109/9110: projeção rev. 2024?
 
 
 def _get(url: str, **params):
@@ -29,17 +29,14 @@ def _tentar(titulo: str, fn) -> None:
 
 
 def listar_projecoes() -> None:
-    dados = _get(AGREGADOS, assunto="Projeção")  # filtra por assunto; se não houver, lista tudo
-    achou = False
+    """Lista toda tabela cuja pesquisa ou nome menciona projeção/idade/população."""
+    dados = _get(AGREGADOS)
     for pesquisa in dados:
+        pn = pesquisa.get("nome", "")
         for ag in pesquisa.get("agregados", []):
             nome = ag.get("nome", "")
-            if "rojeç" in nome or "rojec" in nome:
-                achou = True
-                print(ag["id"], "|", pesquisa.get("nome"), "|", nome)
-    if not achou:
-        print("nenhum agregado com 'Projeção' no nome; resposta crua (início):")
-        print(json.dumps(dados, ensure_ascii=False)[:1500])
+            if "rojeç" in pn or "rojeç" in nome or ("idade" in nome.lower() and "popul" in nome.lower()):
+                print(ag["id"], "|", pn, "|", nome)
 
 
 def metadados(tabela: int) -> None:
@@ -50,7 +47,7 @@ def metadados(tabela: int) -> None:
     for c in m.get("classificacoes", []):
         cats = c.get("categorias", [])
         print(f"classificacao {c['id']} '{c['nome']}': {len(cats)} categorias")
-        for cat in cats[:6] + (cats[-3:] if len(cats) > 9 else []):
+        for cat in (cats if len(cats) <= 40 else cats[:6] + cats[-3:]):
             print("   ", cat["id"], cat["nome"])
     per = _get(f"{AGREGADOS}/{tabela}/periodos")
     ids = [p["id"] for p in per]
