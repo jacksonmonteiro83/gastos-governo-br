@@ -49,7 +49,8 @@ def baixar_mes(ano: int, mes: int, pasta: Path = DESTINO) -> Path:
             for bloco in r.iter_content(chunk_size=1 << 20):
                 f.write(bloco)
     if not zipfile.is_zipfile(destino):
-        raise ValueError(f"{destino} não é um ZIP: o portal pode ter devolvido uma página HTML.")
+        raise ValueError(f"{destino} não é um ZIP (HTTP {r.status_code}, {r.headers.get('content-type')}, "
+                         f"{destino.stat().st_size} bytes): o portal pode ter devolvido uma página HTML.")
     print(f"Baixado: {url_mes(ano, mes)} -> {destino} ({destino.stat().st_size / 1e6:.2f} MB)")
     return destino
 
@@ -144,20 +145,44 @@ def meses(inicio=PRIMEIRO_MES, fim=None):
         ano, mes = (ano + 1, 1) if mes == 12 else (ano, mes + 1)
 
 
+def baixar_com_retentativas(ano: int, mes: int, pasta: Path = DESTINO, tentativas: int = 4,
+                            espera_base: float = 5.0) -> Path:
+    """Baixa um mês. 404 = mês não publicado (desiste na hora). Qualquer outra falha (resposta HTML,
+    timeout, 5xx, limite de requisições do portal) é repetida com espera crescente."""
+    for t in range(1, tentativas + 1):
+        try:
+            return baixar_mes(ano, mes, pasta)
+        except requests.HTTPError as e:
+            if e.response is not None and e.response.status_code == 404:
+                raise
+            erro = e
+        except (ValueError, requests.RequestException) as e:
+            erro = e
+        (pasta / f"{ano}{mes:02d}.zip").unlink(missing_ok=True)
+        if t < tentativas:
+            espera = espera_base * 2 ** (t - 1)
+            print(f"{ano}{mes:02d}: tentativa {t}/{tentativas} falhou ({erro}); nova tentativa em {espera:.0f}s")
+            time.sleep(espera)
+    raise erro
+
+
 def baixar_intervalo(inicio=PRIMEIRO_MES, fim=None, pasta: Path = DESTINO) -> list[Path]:
-    """Baixa os meses ainda ausentes. Meses não publicados (404/não-ZIP) são ignorados."""
-    caminhos = []
+    """Baixa os meses ainda ausentes. Meses não publicados (404) ou que falham mesmo após
+    as retentativas ficam de fora, e a lista deles é impressa no fim."""
+    caminhos, ignorados = [], []
     for ano, mes in meses(inicio, fim):
         destino = pasta / f"{ano}{mes:02d}.zip"
         if not destino.exists():
             try:
-                baixar_mes(ano, mes, pasta)
-            except (requests.HTTPError, ValueError) as e:
+                baixar_com_retentativas(ano, mes, pasta)
+            except (requests.RequestException, ValueError) as e:
                 print(f"{ano}{mes:02d}: ignorado ({e})")
                 destino.unlink(missing_ok=True)
+                ignorados.append(f"{ano}{mes:02d}")
                 continue
-            time.sleep(0.5)  # gentileza com o portal
+            time.sleep(1.0)  # gentileza com o portal
         caminhos.append(destino)
+    print(f"Meses baixados/em cache: {len(caminhos)} | ignorados: {len(ignorados)} {ignorados}")
     return caminhos
 
 

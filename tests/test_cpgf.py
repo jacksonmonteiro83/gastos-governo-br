@@ -63,3 +63,35 @@ def test_normalizar_mes_nao_guarda_pessoas():
 
 def test_meses_intervalo():
     assert list(meses((2023, 11), (2024, 2))) == [(2023, 11), (2023, 12), (2024, 1), (2024, 2)]
+
+
+def test_retentativas_nao_repetem_404_e_repetem_outras_falhas(monkeypatch, tmp_path):
+    import requests
+    from pipeline import cpgf
+
+    chamadas = []
+
+    def falha_depois_ok(ano, mes, pasta):
+        chamadas.append(1)
+        if len(chamadas) < 3:
+            raise ValueError("não é um ZIP")
+        return tmp_path / "ok.zip"
+
+    monkeypatch.setattr(cpgf, "baixar_mes", falha_depois_ok)
+    monkeypatch.setattr(cpgf.time, "sleep", lambda s: None)
+    assert cpgf.baixar_com_retentativas(2020, 1, tmp_path).name == "ok.zip"
+    assert len(chamadas) == 3
+
+    resp = requests.Response()
+    resp.status_code = 404
+    n404 = []
+
+    def nao_publicado(ano, mes, pasta):
+        n404.append(1)
+        raise requests.HTTPError(response=resp)
+
+    monkeypatch.setattr(cpgf, "baixar_mes", nao_publicado)
+    import pytest
+    with pytest.raises(requests.HTTPError):
+        cpgf.baixar_com_retentativas(2030, 1, tmp_path)
+    assert len(n404) == 1
