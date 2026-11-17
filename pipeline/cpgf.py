@@ -30,6 +30,8 @@ URL_BASE = "https://portaldatransparencia.gov.br/download-de-dados/cpgf/"
 DESTINO = RAW_DIR / "cpgf"
 SAIDA = RAW_DIR / "cpgf_normalizado.parquet"
 PRIMEIRO_MES = (2013, 1)
+LIMITE_FALHAS_SEGUIDAS = 3
+PAUSA_ENTRE_MESES = 2.0
 # Os CSVs do portal costumam vir em latin-1, separados por ponto e vírgula.
 ENCODINGS = ("utf-8-sig", "latin-1")
 
@@ -170,6 +172,7 @@ def baixar_intervalo(inicio=PRIMEIRO_MES, fim=None, pasta: Path = DESTINO) -> li
     """Baixa os meses ainda ausentes. Meses não publicados (404) ou que falham mesmo após
     as retentativas ficam de fora, e a lista deles é impressa no fim."""
     caminhos, ignorados = [], []
+    falhas_seguidas = 0
     for ano, mes in meses(inicio, fim):
         destino = pasta / f"{ano}{mes:02d}.zip"
         if not destino.exists():
@@ -179,8 +182,15 @@ def baixar_intervalo(inicio=PRIMEIRO_MES, fim=None, pasta: Path = DESTINO) -> li
                 print(f"{ano}{mes:02d}: ignorado ({e})")
                 destino.unlink(missing_ok=True)
                 ignorados.append(f"{ano}{mes:02d}")
+                nao_publicado = isinstance(e, requests.HTTPError) and e.response is not None and e.response.status_code == 404
+                falhas_seguidas = 0 if nao_publicado else falhas_seguidas + 1
+                if falhas_seguidas >= LIMITE_FALHAS_SEGUIDAS:
+                    print(f"{LIMITE_FALHAS_SEGUIDAS} falhas seguidas (provável bloqueio temporário do portal): "
+                          "parando; os meses já baixados ficam em cache para a próxima execução.")
+                    break
                 continue
-            time.sleep(1.0)  # gentileza com o portal
+            falhas_seguidas = 0
+            time.sleep(PAUSA_ENTRE_MESES)  # gentileza com o portal
         caminhos.append(destino)
     print(f"Meses baixados/em cache: {len(caminhos)} | ignorados: {len(ignorados)} {ignorados}")
     return caminhos
