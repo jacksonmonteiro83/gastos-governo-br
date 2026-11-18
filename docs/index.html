@@ -4,21 +4,22 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Para onde vai o dinheiro do governo federal</title>
-<meta name="description" content="Juros, previdência, pessoal, saúde, educação e investimento do governo central desde 1997, em valores corrigidos pelo IPCA.">
+<meta name="description" content="Despesas, previdência, juros e cartão corporativo do governo federal, com dados abertos e valores corrigidos pelo IPCA.">
 <link rel="stylesheet" href="estilo.css">
 </head>
 <body>
 <main>
   <nav class="menu" aria-label="Seções">
-    <a href="index.html" aria-current="page">Visão geral</a>
+    <a href="index.html" aria-current="page">Início</a>
     <a href="despesas.html">Despesas</a>
     <a href="previdencia.html">Previdência</a>
+    <a href="juros.html">Juros</a>
     <a href="cartao.html">Cartão corporativo</a>
   </nav>
   <header>
     <div>
       <h1>Para onde vai o dinheiro do governo federal</h1>
-      <p class="sub" id="sub"></p>
+      <p class="sub">Quatro recortes dos dados abertos, em reais de hoje (IPCA)</p>
     </div>
     <button class="tema" id="tema" type="button" aria-label="Alternar tema claro e escuro">Tema</button>
   </header>
@@ -27,211 +28,71 @@
     <div class="num" id="hero-num"></div>
     <p class="leg" id="hero-leg"></p>
   </div>
-  <div class="kpis" id="kpis"></div>
 
-  <section class="card">
-    <h2>Juros contra o resto</h2>
-    <p class="nota" id="nota1"></p>
-    <ul class="legenda" id="leg1"></ul>
-    <div class="chart" id="c1"></div>
-    <details><summary>Ver dados em tabela</summary><div class="tabela" id="t1"></div></details>
-  </section>
+  <div class="portas" id="portas"></div>
 
-  <section class="card">
-    <h2>De que é feito o gasto total, ano a ano</h2>
-    <p class="nota">R$ bilhões de <span class="ref"></span>, anos completos. Juros mais as quatro grandes contas da despesa primária.</p>
-    <ul class="legenda" id="leg2"></ul>
-    <div class="chart" id="c2"></div>
-    <details><summary>Ver dados em tabela</summary><div class="tabela" id="t2"></div></details>
+  <section class="card" id="idade" hidden>
+    <h2>O pano de fundo: o país envelhece</h2>
+    <p class="nota" id="idade-txt"></p>
+    <div class="kpis" id="idade-kpis" style="margin-bottom:0"></div>
   </section>
 
   <footer>
-    <p><b>Como ler.</b> Todos os valores estão em reais de <span class="ref"></span> (corrigidos pelo IPCA), então anos diferentes são comparáveis. Os gráficos usam só anos completos; o total do topo vai até <span id="ate"></span>.</p>
-    <p><b>Juros</b> são os juros nominais do governo central (critério "abaixo da linha", dados do Banco Central), líquidos de receitas de juros. Não são o total bruto que aparece no orçamento, e em alguns meses o valor líquido chega a ser positivo.</p>
-    <p><b>Comparação com as manchetes.</b> O Banco Central divulga juros do setor público consolidado (União, estados, municípios e estatais): R$ 950,4 bi em 2024. Este painel mostra só o governo central, que somou R$ 855 bi em 2024 em valores da época, então os números diferem por perímetro e não por erro.</p>
-    <p><b>Saúde e educação</b> aqui são só as despesas do Poder Executivo sujeitas à programação financeira. Folha de servidores (que fica em "Pessoal e encargos"), complemento do Fundeb e transferências a estados e municípios ficam de fora, então os valores subestimam o gasto total nessas áreas.</p>
-    <p><b>Fontes:</b> <a href="https://www.tesourotransparente.gov.br/ckan/dataset/resultado-do-tesouro-nacional">Resultado do Tesouro Nacional (Tesouro Transparente)</a> e Banco Central do Brasil. Código e método: <a href="https://github.com/jacksonmonteiro83/gastos-governo-br">github.com/jacksonmonteiro83/gastos-governo-br</a>.</p>
+    <p><b>Os números não somam entre páginas.</b> Despesas usa o orçamento realizado (Portal da Transparência); Previdência e Juros usam o resultado do Tesouro Nacional, por critério de caixa. Conceitos diferentes dão totais diferentes, e cada página explica o seu.</p>
+    <p><b>Fontes:</b> Portal da Transparência, Tesouro Transparente, Banco Central, IBGE (projeção da população, revisão 2024). Código e método: <a href="https://github.com/jacksonmonteiro83/gastos-governo-br">github.com/jacksonmonteiro83/gastos-governo-br</a>.</p>
   </footer>
 </main>
-<div class="tip" id="tip"></div>
 
 <script src="data.js"></script>
+<script src="despesas_data.js"></script>
+<script src="previdencia_data.js"></script>
+<script src="cpgf_data.js"></script>
+<script src="demografia_data.js"></script>
 <script>
 (function () {
-  const D = window.DADOS;
-  const fmt0 = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 });
-  const fmt1 = new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
-  const fmt2 = new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  const num = (v) => (v == null ? "—" : fmt0.format(v));
-  const MESES = ["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
-  const mesAno = (s) => { const [a, m] = s.split("-"); return MESES[+m - 1] + "/" + a; };
+  const f0 = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 });
+  const f1 = new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  const f2 = new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const portas = [];
+  const porta = (href, titulo, valor, desc, ir) => portas.push(
+    '<a class="porta" href="' + href + '"><span class="t">' + titulo + '</span><span class="v">' + valor +
+    '</span><span class="d">' + desc + '</span><span class="ir">' + ir + ' →</span></a>');
 
-  // anos completos
-  const idx = D.anos.map((_, i) => i).filter(i => D.meses[i] === 12);
-  const anos = idx.map(i => D.anos[i]);
-  const val = (k) => idx.map(i => D.series[k].valores[i]);
-  const prim = idx.map(i => D.despesa_primaria[i]);
-
-  // cor por entidade (fixa em todo o painel)
-  const COR = { juros: "--s1", previdencia: "--s2", pessoal: "--s3", outras_obrigatorias: "--s4",
-                executivo: "--s5", saude: "--s6", educacao: "--s7", investimento: "--s8" };
-  const ROT = { juros: "Juros da dívida", previdencia: "Previdência", pessoal: "Pessoal e encargos",
-                outras_obrigatorias: "Outras obrigatórias", executivo: "Demais do Executivo",
-                saude: "Saúde*", educacao: "Educação*", investimento: "Investimento" };
-  const NS = "http://www.w3.org/2000/svg";
-  const css = (v) => "var(" + v + ")";
-
-  // ---------- topo ----------
-  document.querySelectorAll(".ref").forEach(e => e.textContent = D.referencia);
-  document.getElementById("ate").textContent = mesAno(D.ultimo_mes);
-  document.getElementById("sub").textContent =
-    "Governo central, jan/1997 a " + mesAno(D.ultimo_mes) + " · R$ de " + D.referencia + " (IPCA)";
-  const H = D.destaques, ref = H.ano_referencia, ri = D.anos.indexOf(ref);
-  document.getElementById("hero-num").textContent = "R$ " + fmt2.format(H.juros_total_tri) + " tri";
-  document.getElementById("hero-leg").textContent =
-    "pagos em juros da dívida desde 1997, em valores de hoje. É " + fmt1.format(H.juros_pct_gasto_total) +
-    "% de tudo que o governo central gastou, somando juros e despesas primárias.";
-  const juros = D.series.juros.valores[ri], inv = D.series.investimento.valores[ri];
-  const share = 100 * juros / (juros + D.despesa_primaria[ri]);
-  document.getElementById("kpis").innerHTML = [
-    ["R$ " + fmt2.format(H.juros_por_dia_bi) + " bi", "por dia em juros, em " + ref],
-    ["R$ " + fmt0.format(juros) + " bi", "em juros em " + ref + ": " + fmt1.format(juros / inv) + "× o investimento federal (R$ " + fmt0.format(inv) + " bi)"],
-    [fmt1.format(share) + "%", "do gasto total de " + ref + " foram juros"],
-  ].map(([v, l]) => '<div class="kpi"><div class="v">' + v + '</div><div class="l">' + l + '</div></div>').join("");
-  document.getElementById("nota1").textContent =
-    "R$ bilhões de " + D.referencia + " por ano. *Saúde e educação: só despesas do Executivo sujeitas à programação financeira (veja a nota no rodapé). Saúde, educação e investimento só existem na série a partir de 2008.";
-
-  // ---------- helpers ----------
-  const el = (n, a, p) => { const e = document.createElementNS(NS, n); for (const k in a) e.setAttribute(k, a[k]); if (p) p.appendChild(e); return e; };
-  const niceMax = (m, step) => Math.ceil(m / step) * step;
-  const tip = document.getElementById("tip");
-  function showTip(host, html, x, y) {
-    tip.innerHTML = html; tip.style.display = "block";
-    const r = host.getBoundingClientRect(), t = tip.getBoundingClientRect();
-    let left = x + r.left + window.scrollX + 14, top = y + r.top + window.scrollY - t.height / 2;
-    if (left + t.width > window.scrollX + document.documentElement.clientWidth - 8) left = x + r.left + window.scrollX - t.width - 14;
-    tip.style.left = Math.max(8, left) + "px"; tip.style.top = Math.max(8, top) + "px";
+  const S = window.DESP && window.DESP.destaques;
+  if (S) {
+    document.getElementById("hero-num").textContent = f1.format(S.trio_pct) + "%";
+    document.getElementById("hero-leg").textContent =
+      "de tudo que o governo federal gastou em " + S.ano_referencia + " (fora a rolagem da dívida) foi para só três contas: previdência, pessoal e juros. São R$ " +
+      f1.format(S.trio_dia_bi) + " bi por dia.";
+    porta("despesas.html", "Despesas", "R$ " + f1.format(S.total_bi / 1000) + " tri",
+      "gastos realizados em " + S.ano_referencia + ", sem amortização da dívida. Saúde ficou com " + f1.format(S.saude_pct) +
+      "% e educação com " + f1.format(S.educacao_pct) + "%.", "Ver quem fica com cada R$ 100");
   }
-  const hideTip = () => { tip.style.display = "none"; };
-  const legenda = (id, keys) => {
-    document.getElementById(id).innerHTML = keys.map(k =>
-      '<li><i style="background:' + css(COR[k]) + '"></i>' + ROT[k] + '</li>').join("");
-  };
-  function tabela(id, keys, extra) {
-    const head = "<tr><th>Ano</th>" + keys.map(k => "<th>" + ROT[k] + "</th>").join("") + (extra ? "<th>" + extra.rot + "</th>" : "") + "</tr>";
-    const rows = anos.map((a, i) => "<tr><td>" + a + "</td>" + keys.map(k => "<td>" + num(val(k)[i]) + "</td>").join("") +
-      (extra ? "<td>" + fmt0.format(extra.v[i]) + "</td>" : "") + "</tr>").join("");
-    document.getElementById(id).innerHTML = "<table><thead>" + head + "</thead><tbody>" + rows + "</tbody></table>";
-  }
-  function eixoX(svg, x, top, bottom) {
-    const g = el("g", { class: "eixo" }, svg);
-    anos.forEach((a, i) => { if (a % 5 === 0) el("text", { x: x(i), y: bottom + 16, "text-anchor": "middle" }, g).textContent = a; });
-  }
-  function eixoY(svg, y, max, step, left, right) {
-    const g = el("g", { class: "eixo" }, svg);
-    for (let v = 0; v <= max; v += step) {
-      el("line", { x1: left, x2: right, y1: y(v), y2: y(v), stroke: css("--grid"), "stroke-width": 1 }, svg);
-      el("text", { x: left - 6, y: y(v) + 4, "text-anchor": "end" }, g).textContent = fmt0.format(v);
-    }
+  const P = window.PREV && window.PREV.destaques;
+  if (P) porta("previdencia.html", "Previdência (INSS)", f1.format(P.cobertura_pct) + "%",
+    "do que o INSS paga em benefícios foi coberto pela contribuição em " + P.ano_referencia + ". O resto, R$ " +
+    f0.format(P.necessidade_bi) + " bi, saiu do Tesouro (" + f1.format(P.pct_pib_necessidade).replace(".", ",") + "% do PIB).", "Ver a conta e o envelhecimento");
+  const J = window.DADOS && window.DADOS.destaques;
+  if (J) porta("juros.html", "Juros da dívida", "R$ " + f2.format(J.juros_total_tri) + " tri",
+    "pagos desde 1997, " + f1.format(J.juros_pct_gasto_total) + "% do gasto total do governo central. Em " + J.ano_referencia +
+    ": R$ " + f2.format(J.juros_por_dia_bi) + " bi por dia (critério de caixa).", "Ver juros contra o resto");
+  const C = window.CPGF && window.CPGF.destaques;
+  if (C) porta("cartao.html", "Cartão corporativo", f1.format(C.sigilo_pct) + "%",
+    "do valor gasto nos cartões do governo desde 2013 está sob sigilo, sem identificar o favorecido. Total: R$ " +
+    f2.format(C.total_real / 1e9) + " bi.", "Ver os gastos no cartão");
+  document.getElementById("portas").innerHTML = portas.join("");
+
+  const D = window.DEMO;
+  if (D) {
+    const v = (a) => D.razao_idosos[D.anos.indexOf(a)];
+    const ult = D.anos[D.anos.length - 1], ano0 = D.anos[0], ref = D.primeiro_ano_projecao;
+    document.getElementById("idade-txt").textContent =
+      "Idosos (65+) para cada 100 pessoas de 15 a 64 anos. Dos dados de " + ref + " em diante é projeção do IBGE.";
+    document.getElementById("idade-kpis").innerHTML = [[ano0, v(ano0)], [ref, v(ref)], [ult, v(ult)]].map(([a, x]) =>
+      '<div class="kpi"><div class="v">' + f1.format(x) + '</div><div class="l">em ' + a + (a >= ref && a !== ref ? " (projeção)" : "") + '</div></div>').join("");
+    document.getElementById("idade").hidden = false;
   }
 
-  // ---------- gráfico 1: linhas ----------
-  const K1 = ["juros", "saude", "educacao", "investimento"];
-  function linhas() {
-    const host = document.getElementById("c1"); host.querySelectorAll("svg").forEach(s => s.remove());
-    const W = Math.max(300, host.clientWidth), Ht = W < 520 ? 260 : 320;
-    const m = { l: 40, r: W < 520 ? 84 : 112, t: 10, b: 24 };
-    const svg = el("svg", { viewBox: "0 0 " + W + " " + Ht, role: "img",
-      "aria-label": "Linhas: juros, saúde, educação e investimento por ano, em R$ bilhões. Juros em " + ref + ": " + fmt0.format(juros) + " bilhões." });
-    host.insertBefore(svg, host.firstChild);
-    const max = niceMax(Math.max(...val("juros")), 200), step = 200;
-    const x = (i) => m.l + (W - m.l - m.r) * i / (anos.length - 1);
-    const y = (v) => Ht - m.b - (Ht - m.t - m.b) * v / max;
-    eixoY(svg, y, max, step, m.l, W - m.r); eixoX(svg, x, m.t, Ht - m.b);
-    const fim = [];
-    K1.forEach(k => {
-      const v = val(k);
-      let d = "", iniciou = false;
-      v.forEach((n, i) => { if (n == null) return; d += (iniciou ? "L" : "M") + x(i).toFixed(1) + "," + y(n).toFixed(1); iniciou = true; });
-      el("path", { d, fill: "none", stroke: css(COR[k]), "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }, svg);
-      el("circle", { cx: x(v.length - 1), cy: y(v[v.length - 1]), r: 4, fill: css(COR[k]), stroke: css("--surface"), "stroke-width": 2 }, svg);
-      fim.push({ k, y: y(v[v.length - 1]) });
-    });
-    // rótulos diretos, sem sobreposição
-    fim.sort((a, b) => a.y - b.y);
-    for (let i = 1; i < fim.length; i++) if (fim[i].y - fim[i - 1].y < 14) fim[i].y = fim[i - 1].y + 14;
-    const g = el("g", { class: "rot" }, svg);
-    fim.forEach(f => {
-      el("circle", { cx: W - m.r + 12, cy: f.y, r: 4, fill: css(COR[f.k]) }, g);
-      el("text", { x: W - m.r + 20, y: f.y + 4 }, g).textContent = (W < 520 && f.k === "juros") ? "Juros" : ROT[f.k];
-    });
-    // hover
-    const guia = el("line", { y1: m.t, y2: Ht - m.b, stroke: css("--text-3"), "stroke-width": 1, "stroke-dasharray": "3 3", visibility: "hidden" }, svg);
-    const pts = K1.map(k => el("circle", { r: 4, fill: css(COR[k]), stroke: css("--surface"), "stroke-width": 2, visibility: "hidden" }, svg));
-    const alvo = el("rect", { x: m.l, y: m.t, width: W - m.l - m.r, height: Ht - m.t - m.b, fill: "transparent" }, svg);
-    const mover = (ev) => {
-      const r = svg.getBoundingClientRect(), px = (ev.clientX - r.left) * W / r.width;
-      let i = Math.round((px - m.l) / (W - m.l - m.r) * (anos.length - 1));
-      i = Math.max(0, Math.min(anos.length - 1, i));
-      guia.setAttribute("x1", x(i)); guia.setAttribute("x2", x(i)); guia.setAttribute("visibility", "visible");
-      K1.forEach((k, j) => {
-        const n = val(k)[i];
-        if (n == null) { pts[j].setAttribute("visibility", "hidden"); return; }
-        pts[j].setAttribute("cx", x(i)); pts[j].setAttribute("cy", y(n)); pts[j].setAttribute("visibility", "visible");
-      });
-      const html = "<b>" + anos[i] + "</b>" + K1.map(k => '<div><span><i style="background:' + css(COR[k]) + '"></i>' + ROT[k] +
-        '</span><span class="v">' + (val(k)[i] == null ? "sem dado" : "R$ " + fmt0.format(val(k)[i]) + " bi") + '</span></div>').join("");
-      showTip(host, html, x(i) * r.width / W, ev.clientY - r.top);
-    };
-    const sair = () => { guia.setAttribute("visibility", "hidden"); pts.forEach(p => p.setAttribute("visibility", "hidden")); hideTip(); };
-    alvo.addEventListener("pointermove", mover); alvo.addEventListener("pointerleave", sair);
-  }
-
-  // ---------- gráfico 2: colunas empilhadas ----------
-  const K2 = ["juros", "previdencia", "pessoal", "outras_obrigatorias", "executivo"];
-  function colunas() {
-    const host = document.getElementById("c2"); host.querySelectorAll("svg").forEach(s => s.remove());
-    const W = Math.max(300, host.clientWidth), Ht = W < 520 ? 260 : 340;
-    const m = { l: 40, r: 6, t: 10, b: 24 };
-    const svg = el("svg", { viewBox: "0 0 " + W + " " + Ht, role: "img",
-      "aria-label": "Colunas empilhadas do gasto total por ano: juros, previdência, pessoal, outras obrigatórias e demais despesas do Executivo." });
-    host.insertBefore(svg, host.firstChild);
-    const tot = anos.map((_, i) => K2.reduce((s, k) => s + val(k)[i], 0));
-    const max = niceMax(Math.max(...tot), 500), step = 500;
-    const slot = (W - m.l - m.r) / anos.length, bw = Math.max(4, slot * 0.7);
-    const xc = (i) => m.l + slot * i + slot / 2;
-    const y = (v) => Ht - m.b - (Ht - m.t - m.b) * v / max;
-    eixoY(svg, y, max, step, m.l, W - m.r); eixoX(svg, xc, m.t, Ht - m.b);
-    const barras = anos.map((_, i) => {
-      let acc = 0; const g = el("g", {}, svg);
-      K2.forEach(k => {
-        const v = val(k)[i], y0 = y(acc), y1 = y(acc + v); acc += v;
-        el("rect", { x: xc(i) - bw / 2, y: y1, width: bw, height: Math.max(0, y0 - y1), fill: css(COR[k]),
-          stroke: css("--surface"), "stroke-width": 2 }, g);
-      });
-      return g;
-    });
-    const guia = el("rect", { y: m.t, height: Ht - m.t - m.b, width: slot, fill: css("--text"), opacity: 0.06, visibility: "hidden" }, svg);
-    const alvo = el("rect", { x: m.l, y: m.t, width: W - m.l - m.r, height: Ht - m.t - m.b, fill: "transparent" }, svg);
-    alvo.addEventListener("pointermove", (ev) => {
-      const r = svg.getBoundingClientRect(), px = (ev.clientX - r.left) * W / r.width;
-      const i = Math.max(0, Math.min(anos.length - 1, Math.floor((px - m.l) / slot)));
-      guia.setAttribute("x", xc(i) - slot / 2); guia.setAttribute("visibility", "visible");
-      const html = "<b>" + anos[i] + " · R$ " + fmt0.format(tot[i]) + " bi</b>" + K2.map(k =>
-        '<div><span><i style="background:' + css(COR[k]) + '"></i>' + ROT[k] + '</span><span class="v">' +
-        fmt0.format(val(k)[i]) + ' (' + fmt0.format(100 * val(k)[i] / tot[i]) + '%)</span></div>').join("");
-      showTip(host, html, xc(i) * r.width / W, ev.clientY - r.top);
-    });
-    alvo.addEventListener("pointerleave", () => { guia.setAttribute("visibility", "hidden"); hideTip(); });
-  }
-
-  legenda("leg1", K1); legenda("leg2", K2);
-  tabela("t1", K1); tabela("t2", K2, { rot: "Total", v: anos.map((_, i) => K2.reduce((s, k) => s + val(k)[i], 0)) });
-  const desenhar = () => { linhas(); colunas(); };
-  desenhar();
-  let t; window.addEventListener("resize", () => { clearTimeout(t); t = setTimeout(desenhar, 120); });
-
-  // tema
   const raiz = document.documentElement;
   document.getElementById("tema").addEventListener("click", () => {
     const escuro = raiz.dataset.theme ? raiz.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;

@@ -77,3 +77,13 @@
   .barra .v { font-variant-numeric: tabular-nums; color: var(--text-2); min-width: 4.5em; text-align: right; }
   .barra .n .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 7px; }
   .aviso { background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; color: var(--text-2); }
+
+  /* página inicial */
+  .portas { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin-bottom: 32px; }
+  .porta { display: flex; flex-direction: column; gap: 4px; background: var(--surface-2); border: 1px solid var(--border);
+           border-radius: 12px; padding: 16px; color: var(--text); text-decoration: none; }
+  .porta:hover, .porta:focus-visible { border-color: var(--text-3); }
+  .porta .t { color: var(--text-2); font-size: .85rem; font-weight: 600; }
+  .porta .v { font-size: 2rem; font-weight: 700; line-height: 1.15; letter-spacing: -.01em; }
+  .porta .d { color: var(--text-2); font-size: .88rem; flex: 1; }
+  .porta .ir { color: var(--s1); font-size: .85rem; margin-top: 6px; }
