@@ -14,6 +14,106 @@ window.DESP = {
   2025,
   2026
  ],
+ "composicao": {
+  "Previdência social": [
+   35.6,
+   35.0,
+   36.4,
+   38.7,
+   36.2,
+   36.1,
+   29.5,
+   36.3,
+   35.9,
+   35.9,
+   33.9,
+   32.8,
+   30.7
+  ],
+  "Pessoal e encargos": [
+   8.2,
+   7.7,
+   9.1,
+   9.7,
+   9.0,
+   8.8,
+   7.1,
+   8.5,
+   7.7,
+   7.4,
+   6.7,
+   7.6,
+   6.9
+  ],
+  "Juros da dívida": [
+   13.1,
+   14.5,
+   13.1,
+   12.6,
+   16.1,
+   15.4,
+   14.5,
+   12.6,
+   10.8,
+   9.6,
+   12.4,
+   11.7,
+   15.7
+  ],
+  "Saúde, educação e assistência": [
+   15.0,
+   14.4,
+   14.4,
+   14.5,
+   13.6,
+   13.3,
+   24.8,
+   17.6,
+   16.7,
+   19.7,
+   19.1,
+   18.9,
+   17.2
+  ],
+  "Investimentos": [
+   1.1,
+   0.5,
+   0.8,
+   1.0,
+   0.9,
+   0.7,
+   0.7,
+   0.7,
+   0.6,
+   1.0,
+   0.9,
+   1.0,
+   0.8
+  ],
+  "Outras": [
+   26.9,
+   27.9,
+   26.3,
+   23.5,
+   24.2,
+   25.7,
+   23.3,
+   24.3,
+   28.4,
+   26.3,
+   27.0,
+   27.9,
+   28.6
+  ]
+ },
+ "composicao_ref_bi": {
+  "Previdência social": 1072.3,
+  "Pessoal e encargos": 249.8,
+  "Juros da dívida": 383.7,
+  "Saúde, educação e assistência": 618.9,
+  "Investimentos": 31.3,
+  "Outras": 913.1
+ },
  "ano_corrente_parcial": true,
  "funcoes": {
   "Previdência social": [
@@ -301,6 +401,9 @@ window.DESP = {
   "pessoal_pct": 10.3,
   "juros_pct": 11.7,
   "investimentos_pct": 1.2,
-  "execucao_pct": 84.7
+  "execucao_pct": 84.7,
+  "trio_pct": 52.2,
+  "trio_bi": 1705.8,
+  "trio_dia_bi": 4.67
  }
 };
