@@ -62,7 +62,7 @@ Para publicar: Settings → Pages → Deploy from a branch → `main` / `/docs`.
 
 ## Limitações conhecidas
 - O Portal da Transparência limita downloads seguidos: a primeira carga completa do cartão (2013 até hoje) precisou de várias execuções do workflow, que guarda os ZIPs já baixados em cache. As atualizações mensais seguintes são rápidas.
-- Os modelos dbt foram escritos e conferidos por leitura e compilação do Jinja, mas a primeira execução real é a do workflow no GitHub.
+- Despesas detalhadas por órgão e função (Portal da Transparência) ainda não estão no pipeline.
 
 ## Atualização
 O workflow **Atualizar dados** roda todo dia, baixa as fontes, executa os testes e publica os `*_data.js`. O workflow **Atualizar CPGF** roda no dia 5 de cada mês, ou manualmente.
