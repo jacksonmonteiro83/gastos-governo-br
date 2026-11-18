@@ -1,0 +1,29 @@
+name: Inspecionar despesas
+
+on:
+  workflow_dispatch:
+    inputs:
+      ano:
+        description: "Ano do orçamento da despesa (AAAA)"
+        default: "2023"
+        required: true
+
+jobs:
+  inspecionar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Baixar e inspecionar o ano
+        env:
+          ANO: ${{ inputs.ano }}
+        run: python -m pipeline.transparencia --inspecionar "$ANO" | tee inspecao_despesas.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: despesas-inspecao
+          path: inspecao_despesas.txt
