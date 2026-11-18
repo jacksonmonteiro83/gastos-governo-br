@@ -28,14 +28,14 @@ Para onde vai o dinheiro do governo federal, em valores reais (corrigidos pelo I
 | Banco Central (SGS) | IPCA (433), Selic mensal (4390), PIB 12m (4382); juros nominais 4606/4607 para conferência | implementado (`pipeline/bcb.py`, `pipeline/validar_juros.py`) |
 | IBGE | Projeções da População, revisão 2024 (2000 a 2070) | implementado (`pipeline/agregar_demografia.py`) |
 | Portal da Transparência | Cartão corporativo (CPGF), mensal | implementado (`pipeline/cpgf.py`, `pipeline/agregar_cpgf.py`) |
-| Portal da Transparência | Despesas (empenho, liquidação, pagamento) | a implementar (`pipeline/transparencia.py`) |
+| Portal da Transparência | Orçamento da despesa por ano (órgão, função, grupo de despesa; orçado, empenhado e realizado), sem favorecidos | implementado (`pipeline/transparencia.py`, `pipeline/agregar_despesas.py`) |
 
 ## Estrutura
 ```
 pipeline/     ingestão e agregação (gera Parquet em data/raw e os .js dos painéis)
 dbt/          modelos SQL (staging, marts), testes de dados (schema.yml e tests/) e macro de leitura de Parquet
 tests/        testes Python (pytest)
-docs/         site estático: index, previdencia, cartao + dados gerados (*_data.js) + img/
+docs/         site estático: index, despesas, previdencia, cartao + dados gerados (*_data.js) + img/
 .github/      workflows: atualização diária, CPGF, validação dos juros, inspeções
 ```
 
@@ -57,12 +57,13 @@ Para publicar: Settings → Pages → Deploy from a branch → `main` / `/docs`.
 - **Juros** = juros nominais do governo central (critério abaixo-da-linha, fonte BCB), com o sinal invertido. É valor líquido. O workflow *Validar juros* compara com as séries do BCB do setor público consolidado: o perímetro é diferente, então os números não são idênticos.
 - **Saúde e educação** = só despesas do Executivo sujeitas à programação financeira (linhas 4.4.1.3, 4.4.2.1, 4.4.1.4 e 4.4.2.2 da tabela 1.2-A). Folha de pessoal e Fundeb ficam em outras linhas. Essas séries, e a de investimento, só existem a partir de 2008.
 - **Previdência** = arrecadação líquida para o RGPS (linha 1.3) e benefícios previdenciários (linha 4.1) do RTN. Não inclui servidores públicos (regimes próprios) nem o BPC. A "necessidade de financiamento" inclui a previdência rural, o que é parte do debate sobre o que contar como déficit. Os benefícios do RTN incluem precatórios e sentenças, então o total difere um pouco do divulgado pelo Ministério da Previdência. Os percentuais do PIB usam valores correntes e o PIB acumulado de dezembro.
+- **Despesas por função** = "orçamento realizado" do Portal da Transparência, em R$ de hoje (IPCA médio do ano). Fica de fora a amortização/refinanciamento da dívida (rolagem de títulos, trilhões por ano) e a reserva de contingência; os juros ficam dentro. Esta página usa o conceito orçamentário e a Visão geral usa o do Tesouro (caixa), então os totais não coincidem.
 - **Demografia** = projeção do IBGE, rotulada como projeção a partir de 2025. O painel não projeta o déficit da previdência.
 - **Cartão corporativo:** valores corrigidos pelo IPCA usando o mês do extrato. Privacidade: portadores, pessoas físicas e MEIs não entram na saída, só órgãos e empresas.
 
 ## Limitações conhecidas
 - O Portal da Transparência limita downloads seguidos: a primeira carga completa do cartão (2013 até hoje) precisou de várias execuções do workflow, que guarda os ZIPs já baixados em cache. As atualizações mensais seguintes são rápidas.
-- Despesas detalhadas por órgão e função (Portal da Transparência) ainda não estão no pipeline.
+- Ainda não há despesas por favorecido ou por documento (empenho, liquidação, pagamento): são arquivos enormes e com pessoas físicas, e o painel usa o orçamento agregado.
 
 ## Atualização
 O workflow **Atualizar dados** roda todo dia, baixa as fontes, executa os testes e publica os `*_data.js`. O workflow **Atualizar CPGF** roda no dia 5 de cada mês, ou manualmente.

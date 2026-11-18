@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Para onde vai o orçamento federal</title>
+<meta name="description" content="Despesa realizada do governo federal por função, tipo de gasto e ministério, de 2014 até hoje, corrigida pelo IPCA.">
+<link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+<main>
+  <nav class="menu" aria-label="Seções">
+    <a href="index.html">Visão geral</a>
+    <a href="despesas.html" aria-current="page">Despesas</a>
+    <a href="previdencia.html">Previdência</a>
+    <a href="cartao.html">Cartão corporativo</a>
+  </nav>
+  <header>
+    <div>
+      <h1>Para onde vai o orçamento federal</h1>
+      <p class="sub" id="sub"></p>
+    </div>
+    <button class="tema" id="tema" type="button" aria-label="Alternar tema claro e escuro">Tema</button>
+  </header>
+
+  <div id="vazio" class="aviso" hidden>
+    Os dados deste painel ainda não foram gerados. No GitHub, rode o workflow <b>Atualizar despesas</b> (aba Actions) e recarregue a página.
+  </div>
+
+  <div id="conteudo" hidden>
+    <div class="hero">
+      <div class="num" id="hero-num"></div>
+      <p class="leg" id="hero-leg"></p>
+    </div>
+    <div class="kpis" id="kpis"></div>
+
+    <section class="card">
+      <h2>Despesa por função de governo</h2>
+      <p class="nota">R$ bilhões de hoje por ano, sem a amortização e o refinanciamento da dívida. As sete funções que mais gastaram no período; o resto fica em "Outras".</p>
+      <ul class="legenda" id="leg1"></ul>
+      <div class="chart" id="c1"></div>
+      <details><summary>Ver dados em tabela</summary><div class="tabela" id="t1"></div></details>
+    </section>
+
+    <section class="card">
+      <h2>Ministérios e órgãos que mais gastam</h2>
+      <p class="nota">Órgão superior em <span class="refano"></span>, R$ bilhões de hoje, sem amortização da dívida.</p>
+      <div class="barras" id="orgaos"></div>
+    </section>
+
+    <footer>
+      <p><b>Como ler.</b> "Realizado" é o termo do Portal da Transparência para a despesa realizada no ano. Valores nominais de cada ano, corrigidos pelo IPCA médio do ano até o último mês disponível. O ano corrente, se aparecer, é parcial.</p>
+      <p><b>O que fica de fora.</b> A amortização e o refinanciamento da dívida pública (R$ <span id="amort"></span> bi em <span class="refano"></span>) são rolagem de títulos, e somar isso aos gastos distorceria tudo; a reserva de contingência também sai. Os <b>juros</b> da dívida ficam dentro, em "Encargos especiais". Essa função também reúne outras obrigações financeiras e transferências, por isso é grande.</p>
+      <p><b>Diferença para a Visão geral.</b> Esta página usa o orçamento (classificação por função, Portal da Transparência); a Visão geral usa o resultado do Tesouro (caixa, abaixo da linha). Os conceitos são diferentes e os totais não coincidem.</p>
+      <p><b>Fonte:</b> <a href="https://portaldatransparencia.gov.br/download-de-dados/orcamento-despesa">Portal da Transparência (CGU), Orçamento da Despesa</a>. Código e método: <a href="https://github.com/jacksonmonteiro83/gastos-governo-br">github.com/jacksonmonteiro83/gastos-governo-br</a>.</p>
+    </footer>
+  </div>
+</main>
+<div class="tip" id="tip"></div>
+
+<script src="despesas_data.js" onerror="void 0"></script>
+<script>
+(function () {
+  const D = window.DESP;
+  const raiz = document.documentElement;
+  document.getElementById("tema").addEventListener("click", () => {
+    const escuro = raiz.dataset.theme ? raiz.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+    raiz.dataset.theme = escuro ? "light" : "dark";
+    desenhar();
+  });
+  if (!D) { document.getElementById("vazio").hidden = false; return; }
+  document.getElementById("conteudo").hidden = false;
+
+  const fmt0 = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 });
+  const fmt1 = new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  const NS = "http://www.w3.org/2000/svg";
+  const el = (n, a, p) => { const e = document.createElementNS(NS, n); for (const k in a) e.setAttribute(k, a[k]); if (p) p.appendChild(e); return e; };
+  const H = D.destaques, ref = H.ano_referencia, anos = D.anos;
+  const iref = anos.indexOf(ref);
+  document.querySelectorAll(".refano").forEach(e => e.textContent = ref);
+  document.getElementById("amort").textContent = fmt0.format(H.amortizacao_bi);
+  document.getElementById("sub").textContent = "Despesa realizada, " + anos[0] + " a " + anos[anos.length - 1] + (D.ano_corrente_parcial ? " (último ano parcial)" : "") + " · IPCA";
+  document.getElementById("hero-num").textContent = "R$ " + fmt0.format(H.total_bi) + " bi";
+  document.getElementById("hero-leg").textContent = "foi a despesa federal realizada em " + ref + ", sem contar a rolagem da dívida, em valores de hoje.";
+  const kpis = [
+    [fmt1.format(H.previdencia_pct) + "%", "foi para a função Previdência social em " + ref],
+    [fmt1.format(H.saude_pct) + "%", "para Saúde"],
+    [fmt1.format(H.educacao_pct) + "%", "para Educação"],
+    [fmt1.format(H.pessoal_pct) + "%", "com pessoal e encargos sociais (todas as funções)"],
+    [fmt1.format(H.juros_pct) + "%", "com juros e encargos da dívida"],
+    [fmt1.format(H.investimentos_pct) + "%", "com investimentos"],
+  ];
+  document.getElementById("kpis").innerHTML = kpis.map(([v, l]) => '<div class="kpi"><div class="v">' + v + '</div><div class="l">' + l + '</div></div>').join("");
+
+  const nomes = Object.keys(D.funcoes);
+  const cor = (i) => "var(--s" + (i + 1) + ")";
+  document.getElementById("leg1").innerHTML = nomes.map((n, i) => '<li><i style="background:' + cor(i) + '"></i>' + n + "</li>").join("");
+  document.getElementById("t1").innerHTML = "<table><thead><tr><th>Ano</th>" + nomes.map(n => "<th>" + n + "</th>").join("") + "<th>Total</th></tr></thead><tbody>" +
+    anos.map((a, j) => "<tr><td>" + a + "</td>" + nomes.map(n => "<td>" + fmt1.format(D.funcoes[n][j]) + "</td>").join("") + "<td>" + fmt1.format(D.total_bi[j]) + "</td></tr>").join("") + "</tbody></table>";
+
+  const max0 = Math.max(...D.orgaos_ano_ref.map(o => o.bi));
+  document.getElementById("orgaos").innerHTML = D.orgaos_ano_ref.map(o =>
+    '<div class="barra" title="' + o.orgao.replace(/"/g, "&quot;") + '"><span class="n">' + o.orgao +
+    '</span><span class="t"><i style="width:' + (100 * o.bi / max0).toFixed(1) + '%"></i></span><span class="v">' + fmt1.format(o.bi) + "</span></div>").join("");
+
+  const tip = document.getElementById("tip");
+  function desenhar() {
+    const host = document.getElementById("c1"); host.querySelectorAll("svg").forEach(s => s.remove());
+    const W = Math.max(300, host.clientWidth), Ht = W < 520 ? 280 : 340, m = { l: 44, r: 12, t: 10, b: 24 };
+    const svg = el("svg", { viewBox: "0 0 " + W + " " + Ht, role: "img", "aria-label": "Colunas empilhadas por ano com a despesa federal por função de governo, em R$ bilhões." });
+    host.insertBefore(svg, host.firstChild);
+    const n = anos.length, mx = Math.max(...D.total_bi);
+    const exp = Math.pow(10, Math.floor(Math.log10(mx))), f = mx / exp, passo = exp * (f > 6 ? 2 : f > 3 ? 1 : f > 1.5 ? 0.5 : 0.2);
+    const max = Math.ceil(mx / passo) * passo;
+    const slot = (W - m.l - m.r) / n, bw = Math.max(6, slot * 0.7), xc = (i) => m.l + slot * i + slot / 2, y = (v) => Ht - m.b - (Ht - m.t - m.b) * v / max;
+    const g = el("g", { class: "eixo" }, svg);
+    for (let v = 0; v <= max + 1e-9; v += passo) {
+      el("line", { x1: m.l, x2: W - m.r, y1: y(v), y2: y(v), stroke: "var(--grid)", "stroke-width": 1 }, svg);
+      el("text", { x: m.l - 6, y: y(v) + 4, "text-anchor": "end" }, g).textContent = fmt0.format(v);
+    }
+    anos.forEach((a, i) => { if (n <= 8 || i % 2 === 0 || i === n - 1) el("text", { x: xc(i), y: Ht - m.b + 16, "text-anchor": "middle" }, g).textContent = a; });
+    anos.forEach((a, i) => {
+      let acc = 0;
+      nomes.forEach((nome, k) => {
+        const v = D.funcoes[nome][i]; if (!v || v <= 0) return;
+        el("rect", { x: xc(i) - bw / 2, y: y(acc + v), width: bw, height: Math.max(0, y(acc) - y(acc + v)), fill: cor(k), stroke: "var(--surface)", "stroke-width": 2 }, svg);
+        acc += v;
+      });
+    });
+    const guia = el("rect", { y: m.t, height: Ht - m.t - m.b, width: slot, fill: "var(--text)", opacity: 0.06, visibility: "hidden" }, svg);
+    const alvo = el("rect", { x: m.l, y: m.t, width: W - m.l - m.r, height: Ht - m.t - m.b, fill: "transparent" }, svg);
+    alvo.addEventListener("pointermove", (ev) => {
+      const r = svg.getBoundingClientRect(), px = (ev.clientX - r.left) * W / r.width;
+      const i = Math.max(0, Math.min(n - 1, Math.floor((px - m.l) / slot)));
+      guia.setAttribute("x", xc(i) - slot / 2); guia.setAttribute("visibility", "visible");
+      tip.innerHTML = "<b>" + anos[i] + (D.ano_corrente_parcial && i === n - 1 ? " · parcial" : "") + " · R$ " + fmt0.format(D.total_bi[i]) + " bi</b>" +
+        nomes.slice().reverse().map(nome => { const k = nomes.indexOf(nome); return '<div><span><i style="background:' + cor(k) + '"></i>' + nome + '</span><span class="v">' + fmt1.format(D.funcoes[nome][i]) + "</span></div>"; }).join("");
+      tip.style.display = "block";
+      const hr = host.getBoundingClientRect(), t = tip.getBoundingClientRect();
+      let left = xc(i) * r.width / W + hr.left + window.scrollX + 14;
+      if (left + t.width > window.scrollX + document.documentElement.clientWidth - 8) left -= t.width + 28;
+      tip.style.left = Math.max(8, left) + "px"; tip.style.top = Math.max(8, ev.clientY + window.scrollY - t.height / 2) + "px";
+    });
+    alvo.addEventListener("pointerleave", () => { guia.setAttribute("visibility", "hidden"); tip.style.display = "none"; });
+  }
+  desenhar();
+  let t; window.addEventListener("resize", () => { clearTimeout(t); t = setTimeout(desenhar, 120); });
+})();
+</script>
+</body>
+</html>
