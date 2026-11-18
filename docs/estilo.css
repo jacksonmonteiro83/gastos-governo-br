@@ -75,4 +75,5 @@
   .barra .t { height: 14px; background: var(--surface-2); border-radius: 0 4px 4px 0; }
   .barra .t i { display: block; height: 100%; background: var(--s1); border-radius: 0 4px 4px 0; }
   .barra .v { font-variant-numeric: tabular-nums; color: var(--text-2); min-width: 4.5em; text-align: right; }
+  .barra .n .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 7px; }
   .aviso { background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; color: var(--text-2); }

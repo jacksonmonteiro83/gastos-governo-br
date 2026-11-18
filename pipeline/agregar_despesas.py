@@ -22,6 +22,9 @@ IPCA = Path("data/raw/bcb_ipca_mensal.parquet")
 SAIDA = Path("docs/despesas_data.js")
 GRUPOS_FORA = {"6", "9"}   # amortização/refinanciamento da dívida; reserva de contingência
 N_FUNCOES = 7              # + "Outras" = 8 categorias (limite da paleta categórica)
+# Composição sem sobreposição: cada linha do orçamento entra na PRIMEIRA categoria que a descreve.
+CATEGORIAS = ["Previdência social", "Pessoal e encargos", "Juros da dívida",
+              "Saúde, educação e assistência", "Investimentos", "Outras"]
 ORDEM_GRUPOS = ["Pessoal e Encargos Sociais", "Outras Despesas Correntes", "Juros e Encargos da Dívida",
                 "Investimentos", "Inversões Financeiras"]
 
@@ -37,6 +40,23 @@ def fator_anual(ipca: pd.DataFrame | None, anos: list[int]) -> pd.Series:
     f = fator_ipca(ipca)
     por_ano = f.groupby(f.index.year).mean()
     return pd.Series({a: float(por_ano.get(a, 1.0)) for a in anos})
+
+
+def categoria(funcao: str, grupo: str) -> str:
+    """Previdência (função, inclusive inativos) > juros > pessoal (demais funções) > saúde/educação/assistência
+    (custeio e transferências) > investimentos > outras."""
+    f, g = str(funcao).lower(), str(grupo)
+    if "previd" in f:
+        return "Previdência social"
+    if g == "Juros e Encargos da Dívida":
+        return "Juros da dívida"
+    if g == "Pessoal e Encargos Sociais":
+        return "Pessoal e encargos"
+    if any(k in f for k in ("saúde", "educa", "assist")):
+        return "Saúde, educação e assistência"
+    if g == "Investimentos":
+        return "Investimentos"
+    return "Outras"
 
 
 def agregar(df: pd.DataFrame, ipca: pd.DataFrame | None = None, ano_corrente: int | None = None) -> dict:
@@ -72,8 +92,14 @@ def agregar(df: pd.DataFrame, ipca: pd.DataFrame | None = None, ano_corrente: in
     soma_f = lambda nome: ref_df[ref_df["funcao"].str.lower().str.contains(nome, regex=False)]["real_bi"].sum()
     grp = lambda g: ref_df[ref_df["grupo"] == g]["real_bi"].sum()
     atual = dentro[dentro["ano"] == ref]["atual_bi"].sum()
+    dentro = dentro.assign(cat=[categoria(f, g) for f, g in zip(dentro["funcao"], dentro["grupo"])])
+    cat_bi = {c: por_ano(dentro[dentro["cat"] == c]) for c in CATEGORIAS}
+    composicao = {c: [_num(100 * v / t) if t else None for v, t in zip(cat_bi[c], total)] for c in CATEGORIAS}
+    trio = ["Previdência social", "Pessoal e encargos", "Juros da dívida"]
     return {
         "anos": anos,
+        "composicao": composicao,
+        "composicao_ref_bi": {c: _num(cat_bi[c][ref]) for c in CATEGORIAS},
         "ano_corrente_parcial": ano_corrente in anos,
         "funcoes": funcoes,
         "grupos": grupos,
@@ -90,6 +116,9 @@ def agregar(df: pd.DataFrame, ipca: pd.DataFrame | None = None, ano_corrente: in
             "juros_pct": pct(grp("Juros e Encargos da Dívida")),
             "investimentos_pct": pct(grp("Investimentos")),
             "execucao_pct": _num(100 * total[ref] / atual) if atual else None,
+            "trio_pct": _num(sum(cat_bi[c][ref] for c in trio) * 100 / total[ref]),
+            "trio_bi": _num(sum(cat_bi[c][ref] for c in trio)),
+            "trio_dia_bi": _num(sum(cat_bi[c][ref] for c in trio) / 365, 2),
         },
     }
 

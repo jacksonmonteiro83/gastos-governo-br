@@ -42,6 +42,16 @@
       <details><summary>Ver dados em tabela</summary><div class="tabela" id="t1"></div></details>
     </section>
 
+    <section class="card" id="comp" hidden>
+      <h2>Quem fica com cada R$ 100</h2>
+      <p class="nota" id="comp-nota"></p>
+      <div class="barras" id="comp-barras"></div>
+      <p class="nota" style="margin-top:18px">Fatia de cada categoria no gasto realizado, por ano. Cada real entra em uma única categoria.</p>
+      <ul class="legenda" id="leg2"></ul>
+      <div class="chart" id="c2"></div>
+      <p class="nota">Previdência social é a função inteira, inclusive inativos. Depois entram juros da dívida e pessoal das demais funções, e só então saúde, educação e assistência (custeio e transferências), investimentos e o resto.</p>
+    </section>
+
     <section class="card">
       <h2>Ministérios e órgãos que mais gastam</h2>
       <p class="nota">Órgão superior em <span class="refano"></span>, R$ bilhões de hoje, sem amortização da dívida.</p>
@@ -66,7 +76,7 @@
   document.getElementById("tema").addEventListener("click", () => {
     const escuro = raiz.dataset.theme ? raiz.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
     raiz.dataset.theme = escuro ? "light" : "dark";
-    desenhar();
+    if (window.desenharTudo) window.desenharTudo(); 
   });
   if (!D) { document.getElementById("vazio").hidden = false; return; }
   document.getElementById("conteudo").hidden = false;
@@ -143,8 +153,56 @@
     });
     alvo.addEventListener("pointerleave", () => { guia.setAttribute("visibility", "hidden"); tip.style.display = "none"; });
   }
-  desenhar();
-  let t; window.addEventListener("resize", () => { clearTimeout(t); t = setTimeout(desenhar, 120); });
+
+  // ---- composição sem sobreposição
+  if (D.composicao) {
+    document.getElementById("comp").hidden = false;
+    const cats = Object.keys(D.composicao), cc = (i) => "var(--s" + (i + 1) + ")";
+    document.getElementById("comp-nota").textContent = "Em " + ref + ", previdência, pessoal e juros ficaram com R$ " + fmt1.format(H.trio_pct) +
+      " de cada R$ 100 gastos, ou cerca de R$ " + fmt1.format(H.trio_dia_bi).replace(".", ",") + " bi por dia. Investimentos: R$ " +
+      fmt1.format(D.composicao["Investimentos"][iref]) + " de cada R$ 100.";
+    document.getElementById("comp-barras").innerHTML = cats.map((c, i) =>
+      '<div class="barra"><span class="n"><i class="sw" style="background:' + cc(i) + '"></i>' + c + '</span><span class="t"><i style="width:' +
+      Math.max(0.5, D.composicao[c][iref]).toFixed(1) + '%;background:' + cc(i) + '"></i></span><span class="v">' + fmt1.format(D.composicao[c][iref]) + "%</span></div>").join("");
+    document.getElementById("leg2").innerHTML = cats.map((c, i) => '<li><i style="background:' + cc(i) + '"></i>' + c + "</li>").join("");
+    const desenhar2 = () => {
+      const host = document.getElementById("c2"); host.querySelectorAll("svg").forEach(s => s.remove());
+      const W = Math.max(300, host.clientWidth), Ht = W < 520 ? 260 : 320, m = { l: 36, r: 12, t: 10, b: 24 };
+      const svg = el("svg", { viewBox: "0 0 " + W + " " + Ht, role: "img", "aria-label": "Linhas por ano com a fatia de cada categoria no gasto federal, em porcentagem." });
+      host.insertBefore(svg, host.firstChild);
+      const n = anos.length, mx = Math.max(...cats.flatMap(c => D.composicao[c].filter(v => v != null))), max = Math.ceil(mx / 10) * 10;
+      const x = (i) => m.l + (W - m.l - m.r) * i / Math.max(1, n - 1), y = (v) => Ht - m.b - (Ht - m.t - m.b) * v / max;
+      const g = el("g", { class: "eixo" }, svg);
+      for (let v = 0; v <= max; v += 10) {
+        el("line", { x1: m.l, x2: W - m.r, y1: y(v), y2: y(v), stroke: "var(--grid)", "stroke-width": 1 }, svg);
+        el("text", { x: m.l - 6, y: y(v) + 4, "text-anchor": "end" }, g).textContent = v + "%";
+      }
+      anos.forEach((a, i) => { if (n <= 8 || i % 2 === 0 || i === n - 1) el("text", { x: x(i), y: Ht - m.b + 16, "text-anchor": "middle" }, g).textContent = a; });
+      cats.forEach((c, k) => {
+        const v = D.composicao[c];
+        el("path", { d: v.map((a, i) => (i ? "L" : "M") + x(i).toFixed(1) + " " + y(a).toFixed(1)).join(" "), fill: "none", stroke: cc(k), "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }, svg);
+      });
+      const guia = el("line", { y1: m.t, y2: Ht - m.b, stroke: "var(--text-3)", "stroke-width": 1, "stroke-dasharray": "3 3", visibility: "hidden" }, svg);
+      const alvo = el("rect", { x: m.l, y: m.t, width: W - m.l - m.r, height: Ht - m.t - m.b, fill: "transparent" }, svg);
+      alvo.addEventListener("pointermove", (ev) => {
+        const r = svg.getBoundingClientRect(), px = (ev.clientX - r.left) * W / r.width;
+        const i = Math.max(0, Math.min(n - 1, Math.round((px - m.l) / ((W - m.l - m.r) / Math.max(1, n - 1)))));
+        guia.setAttribute("x1", x(i)); guia.setAttribute("x2", x(i)); guia.setAttribute("visibility", "visible");
+        tip.innerHTML = "<b>" + anos[i] + (D.ano_corrente_parcial && i === n - 1 ? " · parcial" : "") + "</b>" +
+          cats.map((c, k) => '<div><span><i style="background:' + cc(k) + '"></i>' + c + '</span><span class="v">' + fmt1.format(D.composicao[c][i]) + "%</span></div>").join("");
+        tip.style.display = "block";
+        const hr = host.getBoundingClientRect(), t = tip.getBoundingClientRect();
+        let left = x(i) * r.width / W + hr.left + window.scrollX + 14;
+        if (left + t.width > window.scrollX + document.documentElement.clientWidth - 8) left -= t.width + 28;
+        tip.style.left = Math.max(8, left) + "px"; tip.style.top = Math.max(8, ev.clientY + window.scrollY - t.height / 2) + "px";
+      });
+      alvo.addEventListener("pointerleave", () => { guia.setAttribute("visibility", "hidden"); tip.style.display = "none"; });
+    };
+    window.__desenhar2 = desenhar2;
+  }
+  const desenharTudo = window.desenharTudo = () => { desenhar(); if (window.__desenhar2) window.__desenhar2(); };
+  desenharTudo();
+  let t; window.addEventListener("resize", () => { clearTimeout(t); t = setTimeout(desenharTudo, 120); });
 })();
 </script>
 </body>

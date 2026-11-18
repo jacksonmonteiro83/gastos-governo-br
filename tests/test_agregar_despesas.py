@@ -44,3 +44,23 @@ def test_deflaciona_pelo_ipca():
                          "valor": [1.0] * 36})  # 1% ao mês
     r = agregar(_df(), ipca, ano_corrente=2025)
     assert r["total_bi"][0] > r["total_bi"][2] > 200.0 - 1e-9  # anos antigos sobem mais
+
+
+def test_composicao_sem_sobreposicao():
+    r = agregar(_df(), None, ano_corrente=2025)
+    c = r["composicao"]
+    # previdência 100 + saúde 50 + juros 50 = 200 por ano
+    assert c["Previdência social"][-1] == 50.0 and c["Juros da dívida"][-1] == 25.0
+    assert c["Saúde, educação e assistência"][-1] == 25.0
+    assert abs(sum(v[-1] for v in c.values()) - 100.0) < 0.2   # cada R$ entra em uma só categoria
+    h = r["destaques"]
+    assert h["trio_pct"] == 75.0 and h["trio_bi"] == 150.0
+
+
+def test_categoria_prioridade():
+    from pipeline.agregar_despesas import categoria
+    assert categoria("Previdência social", "Pessoal e Encargos Sociais") == "Previdência social"
+    assert categoria("Saúde", "Pessoal e Encargos Sociais") == "Pessoal e encargos"
+    assert categoria("Saúde", "Outras Despesas Correntes") == "Saúde, educação e assistência"
+    assert categoria("Transporte", "Investimentos") == "Investimentos"
+    assert categoria("Defesa nacional", "Outras Despesas Correntes") == "Outras"
