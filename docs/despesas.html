@@ -63,6 +63,16 @@
       <p class="nota">Previdência social é a função inteira, inclusive inativos. Depois entram juros da dívida e pessoal das demais funções, e só então saúde, educação e assistência (custeio e transferências), investimentos e o resto.</p>
     </section>
 
+    <section class="card" id="outras" hidden>
+      <h2>O que há dentro de "Outras"</h2>
+      <p class="nota" id="outras-nota"></p>
+      <h3 class="sub-h">Por função de governo</h3>
+      <div class="barras" id="outras-funcao"></div>
+      <h3 class="sub-h">Por tipo de despesa (elemento)</h3>
+      <div class="barras" id="outras-elemento"></div>
+      <p class="nota" style="margin-top:14px">"Outras" é o que sobra depois de previdência, juros, pessoal, saúde, educação, assistência e investimentos. Os nomes vêm da classificação oficial do orçamento; quando aparecem transferências, o dinheiro passa pelo governo federal mas é gasto por estados e municípios.</p>
+    </section>
+
     <section class="card">
       <h2>Ministérios e órgãos que mais gastam</h2>
       <p class="nota">Órgão superior em <span class="refano"></span>, R$ bilhões de hoje, sem amortização da dívida.</p>
@@ -72,7 +82,7 @@
     <footer>
       <p><b>Como ler.</b> "Realizado" é o termo do Portal da Transparência para a despesa realizada no ano. Valores nominais de cada ano, corrigidos pelo IPCA médio do ano até o último mês disponível. O ano corrente, se aparecer, é parcial.</p>
       <p><b>O que fica de fora.</b> A amortização e o refinanciamento da dívida pública (R$ <span id="amort"></span> bi em <span class="refano"></span>) são rolagem de títulos, e somar isso aos gastos distorceria tudo; a reserva de contingência também sai. Os <b>juros</b> da dívida ficam dentro, em "Encargos especiais". Essa função também reúne outras obrigações financeiras e transferências, por isso é grande.</p>
-      <p><b>Diferença para a página de Juros.</b> Esta página usa o orçamento (classificação por função, Portal da Transparência); a página de Juros usa o resultado do Tesouro (caixa, abaixo da linha). Os conceitos são diferentes e os totais não coincidem. Em particular, o "realizado" é a execução do orçamento do próprio ano e não inclui o pagamento de restos a pagar de anos anteriores, que pesa sobretudo em investimentos; por isso a fatia de investimentos aqui pode ficar abaixo do que o Tesouro mostra em caixa.</p>
+      <p><b>Diferença para a página de Juros.</b> Esta página usa o orçamento (classificação por função, Portal da Transparência); a página de Juros usa o resultado do Tesouro (caixa, abaixo da linha). Os conceitos são diferentes e os totais não coincidem. Em particular, o "realizado" é a execução do orçamento do próprio ano e não inclui o pagamento de restos a pagar de anos anteriores, que pesa sobretudo em investimentos; por isso a fatia de investimentos aqui fica abaixo do que o Tesouro mostra em caixa<span id="inv-cmp"></span>.</p>
       <p><b>Fonte:</b> <a href="https://portaldatransparencia.gov.br/download-de-dados/orcamento-despesa">Portal da Transparência (CGU), Orçamento da Despesa</a>. Código e método: <a href="https://github.com/jacksonmonteiro83/gastos-governo-br">github.com/jacksonmonteiro83/gastos-governo-br</a>.</p>
     </footer>
   </div>
@@ -80,6 +90,7 @@
 <div class="tip" id="tip"></div>
 
 <script src="despesas_data.js" onerror="void 0"></script>
+<script src="data.js" onerror="void 0"></script>
 <script>
 (function () {
   const D = window.DESP;
@@ -123,6 +134,29 @@
   document.getElementById("orgaos").innerHTML = D.orgaos_ano_ref.map(o =>
     '<div class="barra" title="' + o.orgao.replace(/"/g, "&quot;") + '"><span class="n">' + o.orgao +
     '</span><span class="t"><i style="width:' + (100 * o.bi / max0).toFixed(1) + '%"></i></span><span class="v">' + fmt1.format(o.bi) + "</span></div>").join("");
+
+  const J = window.DADOS && window.DADOS.destaques;
+  if (J && J.investimento_ano_bi && J.ano_referencia === ref) {
+    document.getElementById("inv-cmp").textContent = ": em " + ref + ", R$ " + fmt1.format(H.investimentos_pct * H.total_bi / 100) +
+      " bi aqui contra R$ " + fmt1.format(J.investimento_ano_bi) + " bi no Tesouro (a diferença inclui o pagamento de restos a pagar)";
+  }
+
+  const O = D.outras_ref;
+  if (O && O.por_funcao && O.por_funcao.length) {
+    document.getElementById("outras-nota").textContent = "Em " + ref + ", a categoria \"Outras\" somou R$ " + fmt1.format(O.total_bi) +
+      " bi, " + fmt1.format(D.composicao["Outras"][iref]) + "% do gasto realizado. Percentuais sobre esse total.";
+    const lista = (id, itens) => {
+      const m = Math.max(...itens.map(x => x.bi));
+      document.getElementById(id).innerHTML = itens.map(x =>
+        '<div class="barra" title="' + x.nome.replace(/"/g, "&quot;") + '"><span class="n">' + x.nome +
+        '</span><span class="t"><i style="width:' + (100 * x.bi / m).toFixed(1) + '%"></i></span><span class="v">' +
+        fmt1.format(x.bi) + " (" + fmt1.format(x.pct) + "%)</span></div>").join("");
+    };
+    lista("outras-funcao", O.por_funcao);
+    if (O.por_elemento.length) lista("outras-elemento", O.por_elemento);
+    else document.getElementById("outras-elemento").previousElementSibling.hidden = true;
+    document.getElementById("outras").hidden = false;
+  }
 
   const tip = document.getElementById("tip");
   function desenhar() {

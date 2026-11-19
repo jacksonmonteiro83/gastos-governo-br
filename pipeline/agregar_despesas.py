@@ -59,6 +59,19 @@ def categoria(funcao: str, grupo: str) -> str:
     return "Outras"
 
 
+def _top(df: pd.DataFrame, coluna: str, n: int = 8) -> list[dict]:
+    """As n maiores linhas de `coluna` por valor, mais "Demais" com o resto; % sobre o total do recorte."""
+    soma = df.groupby(coluna)["real_bi"].sum().sort_values(ascending=False)
+    total = soma.sum()
+    if not total:
+        return []
+    linhas = [{"nome": str(k), "bi": _num(v), "pct": _num(100 * v / total)} for k, v in soma.head(n).items()]
+    resto = soma.iloc[n:].sum()
+    if len(soma) > n and resto > 0:
+        linhas.append({"nome": "Demais", "bi": _num(resto), "pct": _num(100 * resto / total)})
+    return linhas
+
+
 def agregar(df: pd.DataFrame, ipca: pd.DataFrame | None = None, ano_corrente: int | None = None) -> dict:
     ano_corrente = ano_corrente or dt.date.today().year
     d = df.copy()
@@ -96,7 +109,13 @@ def agregar(df: pd.DataFrame, ipca: pd.DataFrame | None = None, ano_corrente: in
     cat_bi = {c: por_ano(dentro[dentro["cat"] == c]) for c in CATEGORIAS}
     composicao = {c: [_num(100 * v / t) if t else None for v, t in zip(cat_bi[c], total)] for c in CATEGORIAS}
     trio = ["Previdência social", "Pessoal e encargos", "Juros da dívida"]
+    outras = dentro[(dentro["ano"] == ref) & (dentro["cat"] == "Outras")]
     return {
+        "outras_ref": {
+            "total_bi": _num(outras["real_bi"].sum()),
+            "por_funcao": _top(outras, "funcao"),
+            "por_elemento": _top(outras, "elemento") if "elemento" in outras else [],
+        },
         "anos": anos,
         "composicao": composicao,
         "composicao_ref_bi": {c: _num(cat_bi[c][ref]) for c in CATEGORIAS},

@@ -64,3 +64,22 @@ def test_categoria_prioridade():
     assert categoria("Saúde", "Outras Despesas Correntes") == "Saúde, educação e assistência"
     assert categoria("Transporte", "Investimentos") == "Investimentos"
     assert categoria("Defesa nacional", "Outras Despesas Correntes") == "Outras"
+
+
+def test_outras_detalha_funcao_e_elemento():
+    df = _df()
+    df["elemento"] = "Outros"
+    extra = pd.DataFrame([
+        dict(_linha(2024, "Encargos especiais", "3", "Outras Despesas Correntes", "MF", 30), elemento="Transferências a Estados"),
+        dict(_linha(2024, "Defesa nacional", "3", "Outras Despesas Correntes", "MD", 10), elemento="Material de consumo"),
+    ])
+    r = agregar(pd.concat([df, extra], ignore_index=True), None, ano_corrente=2025)["outras_ref"]
+    assert r["total_bi"] == 40.0
+    assert r["por_funcao"][0] == {"nome": "Encargos especiais", "bi": 30.0, "pct": 75.0}
+    assert r["por_elemento"][0]["nome"] == "Transferências a Estados"
+    assert sum(x["pct"] for x in r["por_funcao"]) == 100.0
+
+
+def test_outras_sem_coluna_elemento():
+    r = agregar(_df(), None, ano_corrente=2025)["outras_ref"]
+    assert r["por_elemento"] == []

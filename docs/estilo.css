@@ -87,3 +87,4 @@
   .porta .v { font-size: 2rem; font-weight: 700; line-height: 1.15; letter-spacing: -.01em; }
   .porta .d { color: var(--text-2); font-size: .88rem; flex: 1; }
   .porta .ir { color: var(--s1); font-size: .85rem; margin-top: 6px; }
+  h3.sub-h { font-size: .9rem; color: var(--text-2); font-weight: 600; margin: 16px 0 8px; }
