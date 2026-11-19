@@ -24,12 +24,13 @@
     <a href="despesas.html">Despesas</a>
     <a href="previdencia.html">Previdência</a>
     <a href="juros.html">Juros</a>
+    <a href="emendas.html">Emendas</a>
     <a href="cartao.html">Cartão corporativo</a>
   </nav>
   <header>
     <div>
       <h1>Para onde vai o dinheiro do governo federal</h1>
-      <p class="sub">Quatro recortes dos dados abertos, em reais de hoje (IPCA)</p>
+      <p class="sub">Cinco recortes dos dados abertos, em reais de hoje (IPCA)</p>
     </div>
     <button class="tema" id="tema" type="button" aria-label="Alternar tema claro e escuro">Tema</button>
   </header>
@@ -48,8 +49,8 @@
   </section>
 
   <footer>
-    <p><b>Os números não somam entre páginas.</b> Despesas usa o orçamento realizado (Portal da Transparência); Previdência e Juros usam o resultado do Tesouro Nacional, por critério de caixa. Conceitos diferentes dão totais diferentes, e cada página explica o seu.</p>
-    <p><b>Fontes:</b> Portal da Transparência, Tesouro Transparente, Banco Central, IBGE (projeção da população, revisão 2024). Código e método: <a href="https://github.com/jacksonmonteiro83/gastos-governo-br">github.com/jacksonmonteiro83/gastos-governo-br</a>.</p>
+    <p><b>Os números não somam entre páginas.</b> Despesas usa o orçamento realizado (Portal da Transparência); Previdência e Juros usam o resultado do Tesouro Nacional, por critério de caixa. Emendas usa o valor empenhado (Portal da Transparência). Conceitos diferentes dão totais diferentes, e cada página explica o seu.</p>
+    <p><b>Fontes:</b> Portal da Transparência (despesas, emendas, cartão), Tesouro Transparente, Banco Central, IBGE (projeção da população, revisão 2024). Código e método: <a href="https://github.com/jacksonmonteiro83/gastos-governo-br">github.com/jacksonmonteiro83/gastos-governo-br</a>.</p>
   </footer>
 </main>
 
@@ -57,6 +58,7 @@
 <script src="despesas_data.js"></script>
 <script src="previdencia_data.js"></script>
 <script src="cpgf_data.js"></script>
+<script src="emendas_data.js" onerror="void 0"></script>
 <script src="demografia_data.js"></script>
 <script>
 (function () {
@@ -86,6 +88,9 @@
   if (J) porta("juros.html", "Juros da dívida", "R$ " + f2.format(J.juros_total_tri) + " tri",
     "pagos desde 1997, " + f1.format(J.juros_pct_gasto_total) + "% do gasto total do governo central. Em " + J.ano_referencia +
     ": R$ " + f2.format(J.juros_por_dia_bi) + " bi por dia (critério de caixa).", "Ver juros contra o resto");
+  const E = window.EMD && window.EMD.destaques;
+  if (E) porta("emendas.html", "Emendas parlamentares", "R$ " + f1.format(E.total_bi) + " bi",
+    "empenhados em " + E.ano_referencia + ", em valores de hoje. " + f1.format(E.especial_pct) + "% foram transferências especiais, direto a estados e municípios.", "Ver tipos, áreas e estados");
   const C = window.CPGF && window.CPGF.destaques;
   if (C) porta("cartao.html", "Cartão corporativo", f1.format(C.sigilo_pct) + "%",
     "do valor gasto nos cartões do governo desde 2013 está sob sigilo, sem identificar o favorecido. Total: R$ " +

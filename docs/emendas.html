@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Emendas parlamentares: quanto, de que tipo e para onde</title>
+<meta name="description" content="Emendas parlamentares ao orçamento federal desde 2014 por tipo (individual, bancada, comissão, relator), função e UF, corrigidas pelo IPCA.">
+<link rel="canonical" href="https://jacksonmonteiro83.github.io/gastos-governo-br/emendas.html">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:title" content="Emendas parlamentares: quanto, de que tipo e para onde">
+<meta property="og:description" content="Despesa realizada do governo federal por função, tipo de gasto e ministério, de 2014 até hoje, corrigida pelo IPCA.">
+<meta property="og:url" content="https://jacksonmonteiro83.github.io/gastos-governo-br/emendas.html">
+<meta property="og:image" content="https://jacksonmonteiro83.github.io/gastos-governo-br/img/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+<main>
+  <nav class="menu" aria-label="Seções">
+    <a href="index.html">Início</a>
+    <a href="despesas.html">Despesas</a>
+    <a href="previdencia.html">Previdência</a>
+    <a href="juros.html">Juros</a>
+    <a href="emendas.html" aria-current="page">Emendas</a>
+    <a href="cartao.html">Cartão corporativo</a>
+  </nav>
+  <header>
+    <div>
+      <h1>Emendas parlamentares</h1>
+      <p class="sub" id="sub"></p>
+    </div>
+    <button class="tema" id="tema" type="button" aria-label="Alternar tema claro e escuro">Tema</button>
+  </header>
+
+  <div id="vazio" class="aviso" hidden>
+    Os dados deste painel ainda não foram gerados. No GitHub, rode o workflow <b>Atualizar emendas</b> (aba Actions) e recarregue a página.
+  </div>
+
+  <div id="conteudo" hidden>
+    <div class="hero">
+      <div class="num" id="hero-num"></div>
+      <p class="leg" id="hero-leg"></p>
+    </div>
+    <div class="kpis" id="kpis"></div>
+
+    <section class="card">
+      <h2>Quanto, por tipo de emenda</h2>
+      <p class="nota" id="nota1"></p>
+      <ul class="legenda" id="leg1"></ul>
+      <div class="chart" id="c1"></div>
+      <details><summary>Ver dados em tabela</summary><div class="tabela" id="t1"></div></details>
+    </section>
+
+    <section class="card">
+      <h2>Para que áreas, em <span class="refano"></span></h2>
+      <p class="nota">Função de governo do gasto, R$ bilhões de hoje empenhados. Percentual sobre o total do ano.</p>
+      <div class="barras" id="b-funcao"></div>
+    </section>
+
+    <section class="card">
+      <h2>Para onde, em <span class="refano"></span></h2>
+      <p class="nota" id="nota-uf"></p>
+      <h3 class="sub-h">Por região</h3>
+      <div class="barras" id="b-regiao"></div>
+      <h3 class="sub-h">Dez maiores estados</h3>
+      <div class="barras" id="b-uf"></div>
+    </section>
+
+    <footer>
+      <p><b>Empenhado.</b> É o valor que o governo reservou para a emenda no ano; nem tudo vira pagamento. A taxa de execução soma o que foi pago no ano e o que foi pago depois, como resto a pagar, sobre o empenhado de cada ano de emenda. Os anos recentes ainda estão em execução, então a taxa deles sobe com o tempo. O ano corrente, se aparecer, é parcial.</p>
+      <p><b>Valores</b> em reais de hoje: nominal de cada ano corrigido pelo IPCA médio do ano da emenda.</p>
+      <p><b>Tipos.</b> Individuais são de cada parlamentar; nas <i>transferências especiais</i> o dinheiro vai direto ao estado ou município, sem convênio nem finalidade definida de antemão. Bancada e comissão têm autoria coletiva. O tipo e as datas seguem a classificação do Portal da Transparência; por isso valores de "relator" aparecem antes de 2020 como o Portal os classifica.</p>
+      <p><b>Localização.</b> Parte dos valores vem sem estado definido (nacional, múltiplo ou exterior) e não entra no ranking de estados nem de regiões. Os estados aparecem em valor absoluto, sem ajustar pela população.</p>
+      <p><b>Fonte:</b> <a href="https://portaldatransparencia.gov.br/download-de-dados/emendas-parlamentares">Portal da Transparência (CGU), Emendas Parlamentares</a>. Código e método: <a href="https://github.com/jacksonmonteiro83/gastos-governo-br">github.com/jacksonmonteiro83/gastos-governo-br</a>.</p>
+    </footer>
+  </div>
+</main>
+<div class="tip" id="tip"></div>
+
+<script src="emendas_data.js" onerror="void 0"></script>
+<script>
+(function () {
+  const D = window.EMD;
+  const raiz = document.documentElement;
+  document.getElementById("tema").addEventListener("click", () => {
+    const escuro = raiz.dataset.theme ? raiz.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+    raiz.dataset.theme = escuro ? "light" : "dark";
+  });
+  if (!D) { document.getElementById("vazio").hidden = false; return; }
+  document.getElementById("conteudo").hidden = false;
+
+  const fmt0 = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 });
+  const fmt1 = new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  const NS = "http://www.w3.org/2000/svg";
+  const el = (n, a, p) => { const e = document.createElementNS(NS, n); for (const k in a) e.setAttribute(k, a[k]); if (p) p.appendChild(e); return e; };
+  const H = D.destaques, ref = H.ano_referencia, anos = D.anos, iref = anos.indexOf(ref);
+  const nomes = Object.keys(D.tipos), cor = (k) => "var(--s" + (k + 1) + ")";
+  document.querySelectorAll(".refano").forEach(e => e.textContent = ref);
+  document.getElementById("sub").textContent = "Emendas ao orçamento federal, " + anos[0] + " a " + anos[anos.length - 1] +
+    (D.ano_corrente_parcial ? " (último ano parcial)" : "") + " · R$ de hoje (IPCA)";
+  document.getElementById("hero-num").textContent = "R$ " + fmt1.format(H.total_bi) + " bi";
+  document.getElementById("hero-leg").textContent = "foi o valor empenhado em emendas parlamentares em " + ref + ", em valores de hoje. São cerca de R$ " +
+    fmt0.format(H.total_bi * 1000 / 365) + " milhões por dia.";
+  const kpis = [];
+  if (H.especial_pct != null) kpis.push([fmt1.format(H.especial_pct) + "%", "foi transferência especial, dinheiro direto ao estado ou município"]);
+  if (H.executado_pct != null) kpis.push([fmt1.format(H.executado_pct) + "%", "do empenhado de " + ref + " já foi pago"]);
+  if (H.fora_de_uf_pct != null) kpis.push([fmt1.format(H.fora_de_uf_pct) + "%", "sem estado definido (nacional, múltiplo ou exterior)"]);
+  if (H.relator_pico_ano) kpis.push(["R$ " + fmt1.format(H.relator_pico_bi) + " bi", "em emendas de relator em " + H.relator_pico_ano + ", o ano de pico"]);
+  document.getElementById("kpis").innerHTML = kpis.map(([v, l]) => '<div class="kpi"><div class="v">' + v + '</div><div class="l">' + l + '</div></div>').join("");
+
+  // frase sobre o fim das emendas de relator, só se os dados mostram isso
+  const rel = D.tipos["Relator"], com = D.tipos["Comissão"];
+  let nota = "R$ bilhões de hoje empenhados por ano.";
+  if (rel && com) {
+    const ult = rel.map((v, i) => v > 0 ? i : -1).reduce((a, b) => Math.max(a, b), -1);
+    if (ult >= 0 && ult < iref) {
+      const soma = rel.slice(0, ult + 1).reduce((a, b) => a + b, 0);
+      nota += " As emendas de relator somaram R$ " + fmt1.format(soma) + " bi até " + anos[ult] + " e não aparecem nos dados depois disso. As de comissão foram de R$ " +
+        fmt1.format(com[ult]) + " bi em " + anos[ult] + " para R$ " + fmt1.format(com[iref]) + " bi em " + ref + ".";
+    }
+  }
+  document.getElementById("nota1").textContent = nota;
+  document.getElementById("leg1").innerHTML = nomes.map((n, k) => '<li><i style="background:' + cor(k) + '"></i>' + n + "</li>").join("");
+  document.getElementById("t1").innerHTML = "<table><thead><tr><th>Ano</th>" + nomes.map(n => "<th>" + n + "</th>").join("") +
+    "<th>Total</th><th>Pago (%)</th></tr></thead><tbody>" + anos.map((a, j) => "<tr><td>" + a + "</td>" +
+    nomes.map(n => "<td>" + fmt1.format(D.tipos[n][j]) + "</td>").join("") + "<td>" + fmt1.format(D.total_bi[j]) + "</td><td>" +
+    (D.executado_pct[j] == null ? "—" : fmt1.format(D.executado_pct[j])) + "</td></tr>").join("") + "</tbody></table>";
+
+  const lista = (id, itens) => {
+    const m = Math.max(...itens.map(x => x.bi));
+    document.getElementById(id).innerHTML = itens.map(x =>
+      '<div class="barra" title="' + x.nome.replace(/"/g, "&quot;") + '"><span class="n">' + x.nome +
+      '</span><span class="t"><i style="width:' + (100 * x.bi / m).toFixed(1) + '%"></i></span><span class="v">' +
+      fmt1.format(x.bi) + " (" + fmt1.format(x.pct) + "%)</span></div>").join("");
+  };
+  lista("b-funcao", D.ref_por_funcao); lista("b-regiao", D.ref_por_regiao); lista("b-uf", D.ref_por_uf);
+  document.getElementById("nota-uf").textContent = "R$ bilhões de hoje empenhados; percentual sobre o que tem estado definido. Em valor absoluto: estados mais populosos aparecem no topo.";
+
+  const tip = document.getElementById("tip");
+  function desenhar() {
+    const host = document.getElementById("c1"); host.querySelectorAll("svg").forEach(s => s.remove());
+    const W = Math.max(300, host.clientWidth), Ht = W < 520 ? 280 : 340, m = { l: 40, r: 12, t: 10, b: 24 };
+    const svg = el("svg", { viewBox: "0 0 " + W + " " + Ht, role: "img", "aria-label": "Colunas empilhadas por ano com as emendas parlamentares por tipo, em R$ bilhões." });
+    host.insertBefore(svg, host.firstChild);
+    const n = anos.length, mx = Math.max(...D.total_bi), passo = mx > 40 ? 10 : 5, max = Math.ceil(mx / passo) * passo;
+    const slot = (W - m.l - m.r) / n, bw = Math.max(6, slot * 0.7), xc = (i) => m.l + slot * i + slot / 2, y = (v) => Ht - m.b - (Ht - m.t - m.b) * v / max;
+    const g = el("g", { class: "eixo" }, svg);
+    for (let v = 0; v <= max + 1e-9; v += passo) {
+      el("line", { x1: m.l, x2: W - m.r, y1: y(v), y2: y(v), stroke: "var(--grid)", "stroke-width": 1 }, svg);
+      el("text", { x: m.l - 6, y: y(v) + 4, "text-anchor": "end" }, g).textContent = fmt0.format(v);
+    }
+    anos.forEach((a, i) => { if (n <= 8 || i % 2 === 0 || i === n - 1) el("text", { x: xc(i), y: Ht - m.b + 16, "text-anchor": "middle" }, g).textContent = a; });
+    anos.forEach((a, i) => {
+      let acc = 0;
+      nomes.forEach((nome, k) => {
+        const v = D.tipos[nome][i]; if (!v || v <= 0) return;
+        el("rect", { x: xc(i) - bw / 2, y: y(acc + v), width: bw, height: Math.max(0, y(acc) - y(acc + v)), fill: cor(k), stroke: "var(--surface)", "stroke-width": 2 }, svg);
+        acc += v;
+      });
+    });
+    const guia = el("rect", { y: m.t, height: Ht - m.t - m.b, width: slot, fill: "var(--text)", opacity: 0.06, visibility: "hidden" }, svg);
+    const alvo = el("rect", { x: m.l, y: m.t, width: W - m.l - m.r, height: Ht - m.t - m.b, fill: "transparent" }, svg);
+    alvo.addEventListener("pointermove", (ev) => {
+      const r = svg.getBoundingClientRect(), px = (ev.clientX - r.left) * W / r.width;
+      const i = Math.max(0, Math.min(n - 1, Math.floor((px - m.l) / slot)));
+      guia.setAttribute("x", xc(i) - slot / 2); guia.setAttribute("visibility", "visible");
+      tip.innerHTML = "<b>" + anos[i] + (D.ano_corrente_parcial && i === n - 1 ? " · parcial" : "") + " · R$ " + fmt1.format(D.total_bi[i]) + " bi</b>" +
+        nomes.map((nome, k) => [nome, k]).reverse().map(([nome, k]) => '<div><span><i style="background:' + cor(k) + '"></i>' + nome + '</span><span class="v">' + fmt1.format(D.tipos[nome][i]) + "</span></div>").join("") +
+        (D.executado_pct[i] == null ? "" : '<div><span>Pago até hoje</span><span class="v">' + fmt1.format(D.executado_pct[i]) + "%</span></div>");
+      tip.style.display = "block";
+      const hr = host.getBoundingClientRect(), t = tip.getBoundingClientRect();
+      let left = xc(i) * r.width / W + hr.left + window.scrollX + 14;
+      if (left + t.width > window.scrollX + document.documentElement.clientWidth - 8) left -= t.width + 28;
+      tip.style.left = Math.max(8, left) + "px"; tip.style.top = Math.max(8, ev.clientY + window.scrollY - t.height / 2) + "px";
+    });
+    alvo.addEventListener("pointerleave", () => { guia.setAttribute("visibility", "hidden"); tip.style.display = "none"; });
+  }
+  desenhar();
+  let t; window.addEventListener("resize", () => { clearTimeout(t); t = setTimeout(desenhar, 120); });
+})();
+</script>
+</body>
+</html>
