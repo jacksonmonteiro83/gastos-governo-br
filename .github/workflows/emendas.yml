@@ -21,6 +21,7 @@ jobs:
       - run: pip install -r requirements.txt
       - run: python -m pipeline.bcb                  # IPCA para corrigir os valores
       - run: python -m pipeline.emendas --tudo       # baixa o arquivo único (todos os anos) e consolida
+      - run: python -m pipeline.populacao_uf         # população por UF (IBGE) para o valor por habitante
       - run: python -m pipeline.agregar_emendas
       - name: Publicar dados do painel
         run: |

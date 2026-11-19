@@ -11,6 +11,7 @@ emendas (as de relator e antigas aparecem sem autor); isso é informado, não es
 import datetime as dt
 import json
 import sys
+import unicodedata
 from pathlib import Path
 
 import pandas as pd
@@ -18,6 +19,7 @@ import pandas as pd
 from pipeline.agregar_despesas import fator_anual
 
 ENTRADA = Path("data/raw/emendas.parquet")
+POPULACAO = Path("data/raw/populacao_uf.parquet")
 IPCA = Path("data/raw/bcb_ipca_mensal.parquet")
 SAIDA = Path("docs/emendas_data.js")
 SEM_AUTOR = {"", "sem informacao", "sem informação", "s/i"}
@@ -43,7 +45,33 @@ def _top(s: pd.Series, n: int = 10) -> list[dict]:
     return [{"nome": str(k), "bi": _num(v, 2), "pct": _num(100 * v / total)} for k, v in s.head(n).items()]
 
 
-def agregar(df: pd.DataFrame, ipca: pd.DataFrame | None = None, ano_corrente: int | None = None) -> dict:
+def _chave(nome: str) -> str:
+    """'SÃO PAULO' e 'São Paulo' viram a mesma chave."""
+    t = unicodedata.normalize("NFKD", str(nome)).encode("ascii", "ignore").decode().lower()
+    return " ".join(t.split())
+
+
+def por_habitante(emendas_uf: pd.Series, pop: pd.DataFrame | None, ano: int) -> tuple[list[dict], int | None]:
+    """emendas_uf: R$ bi por UF (nome) no ano. Devolve as UFs ordenadas por R$ por habitante e o ano da população
+    usado (o mais recente disponível até `ano`). Sem população, devolve lista vazia."""
+    if pop is None or pop.empty:
+        return [], None
+    anos_ok = [a for a in pop["ano"].unique() if a <= ano]
+    if not anos_ok:
+        return [], None
+    ano_pop = int(max(anos_ok))
+    p = pop[pop["ano"] == ano_pop].assign(chave=lambda x: x["uf"].map(_chave)).set_index("chave")["populacao"]
+    linhas = []
+    for nome, bi in emendas_uf.items():
+        k = _chave(nome)
+        if k in p.index and p[k] > 0:
+            linhas.append({"nome": str(nome).title() if str(nome).isupper() else str(nome), "bi": _num(bi, 2),
+                           "pop_mi": _num(p[k] / 1e6, 2), "reais_hab": _num(bi * 1e9 / p[k], 0)})
+    return sorted(linhas, key=lambda x: -x["reais_hab"]), ano_pop
+
+
+def agregar(df: pd.DataFrame, ipca: pd.DataFrame | None = None, ano_corrente: int | None = None,
+            pop: pd.DataFrame | None = None) -> dict:
     ano_corrente = ano_corrente or dt.date.today().year
     d = df.copy()
     d["ano"] = d["ano"].astype(int)
@@ -71,6 +99,7 @@ def agregar(df: pd.DataFrame, ipca: pd.DataFrame | None = None, ano_corrente: in
     ufs = r[r["regiao"].isin(REGIOES_UF)] if "regiao" in r else r
     fora_uf = tot_ref - ufs["empenhado_bi"].sum()
 
+    per_hab, ano_pop = por_habitante(ufs.groupby("uf")["empenhado_bi"].sum(), pop, ref)
     return {
         "anos": anos,
         "ano_corrente_parcial": ano_corrente in anos,
@@ -80,6 +109,8 @@ def agregar(df: pd.DataFrame, ipca: pd.DataFrame | None = None, ano_corrente: in
         "autor_identificado_pct": [_num(v) if pd.notna(v) else None for v in autor_ok],
         "ref_por_funcao": _top(r.groupby("funcao")["empenhado_bi"].sum(), 8),
         "ref_por_uf": _top(ufs.groupby("uf")["empenhado_bi"].sum(), 10),
+        "ref_por_habitante": per_hab,
+        "ano_populacao": ano_pop,
         "ref_por_autor": _top(r[r["autor_ok"]].groupby("autor")["empenhado_bi"].sum(), 10),
         "ref_por_regiao": _top(r[r["regiao"].isin(REGIOES_UF)].groupby("regiao")["empenhado_bi"].sum(), 5) if "regiao" in r else [],
         "destaques": {
@@ -101,7 +132,8 @@ def main() -> None:
     entrada = Path(sys.argv[1]) if len(sys.argv) > 1 else ENTRADA
     df = pd.read_parquet(entrada)
     ipca = pd.read_parquet(IPCA) if IPCA.exists() else None
-    dados = agregar(df, ipca)
+    pop = pd.read_parquet(POPULACAO) if POPULACAO.exists() else None
+    dados = agregar(df, ipca, pop=pop)
     SAIDA.parent.mkdir(parents=True, exist_ok=True)
     SAIDA.write_text("window.EMD = " + json.dumps(dados, ensure_ascii=False, indent=1) + ";\n", encoding="utf-8")
     h = dados["destaques"]

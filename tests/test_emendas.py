@@ -48,3 +48,28 @@ def test_ano_corrente_parcial_nao_e_referencia():
     df = pd.concat([_df(), _df().assign(ano=2025)], ignore_index=True)
     r = agregar(df, None, ano_corrente=2025)
     assert r["ano_corrente_parcial"] is True and r["destaques"]["ano_referencia"] == 2024
+
+
+from pipeline.agregar_emendas import por_habitante
+from pipeline.populacao_uf import normalizar as normalizar_pop
+
+
+def test_populacao_normaliza_sidra():
+    linhas = [{"D1C": "cab"}, {"D1C": "11", "D1N": "Rondônia", "D3C": "2025", "V": "1751950"},
+              {"D1C": "12", "D1N": "Acre", "D3C": "2025", "V": "..."}]
+    p = normalizar_pop(linhas)
+    assert p.to_dict("records") == [{"uf_cod": 11, "uf": "Rondônia", "ano": 2025, "populacao": 1751950.0}]
+
+
+def test_por_habitante_usa_ano_disponivel_e_casa_nomes():
+    pop = pd.DataFrame({"uf": ["São Paulo", "Acre", "São Paulo"], "ano": [2024, 2024, 2026],
+                        "populacao": [40e6, 0.8e6, 41e6]})
+    emendas = pd.Series({"SÃO PAULO": 4.0, "ACRE": 0.4, "FICTICIA": 1.0})   # R$ bi
+    linhas, ano_pop = por_habitante(emendas, pop, 2025)
+    assert ano_pop == 2024                                   # 2026 está no futuro: usa 2024
+    assert [x["nome"] for x in linhas] == ["Acre", "São Paulo"]   # Acre: R$ 500/hab; SP: R$ 100/hab
+    assert linhas[0]["reais_hab"] == 500.0 and linhas[1]["reais_hab"] == 100.0
+
+
+def test_por_habitante_sem_populacao():
+    assert por_habitante(pd.Series({"ACRE": 1.0}), None, 2025) == ([], None)
