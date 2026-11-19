@@ -5,6 +5,7 @@ uma das duas está errada. Roda depois do `dbt build`; sai com código 1 se houv
 
     python -m pipeline.conferir_dbt              # previdência (RGPS)
     python -m pipeline.conferir_dbt --despesas   # despesas por ano e categoria
+    python -m pipeline.conferir_dbt --emendas    # emendas por ano e tipo
 """
 import json
 import sys
@@ -14,6 +15,7 @@ from pathlib import Path
 BANCO = Path("data/gastos.duckdb")
 PREVIDENCIA_JS = Path("docs/previdencia_data.js")
 DESPESAS_JS = Path("docs/despesas_data.js")
+EMENDAS_JS = Path("docs/emendas_data.js")
 TOLERANCIA_BI = 0.11  # o painel arredonda para 2 casas por série; a diferença é arredondamento
 
 
@@ -74,7 +76,47 @@ def conferir_despesas() -> int:
     return 0
 
 
+def comparar_emendas(totais: list[tuple], tipos: list[tuple], painel: dict) -> list[str]:
+    """totais: (ano, total_bi, executado_pct) do mart_emendas_anual; tipos: (ano, tipo, bi) do mart_emendas_tipo_ano;
+    painel: window.EMD. Os dois arredondam a 1 casa; a tolerância é de arredondamento."""
+    erros = []
+    indice = {a: i for i, a in enumerate(painel["anos"])}
+    for ano, total, exec_pct in totais:
+        if ano not in indice:
+            erros.append(f"{ano}: ano está no dbt e não no painel")
+            continue
+        i = indice[ano]
+        if abs(total - painel["total_bi"][i]) > TOLERANCIA_BI:
+            erros.append(f"{ano} total: dbt {total} x painel {painel['total_bi'][i]}")
+        js = painel["executado_pct"][i]
+        if (exec_pct is None) != (js is None) or (js is not None and abs(exec_pct - js) > TOLERANCIA_BI):
+            erros.append(f"{ano} executado: dbt {exec_pct}% x painel {js}%")
+    for ano, tipo, bi in tipos:
+        if ano not in indice or tipo not in painel["tipos"]:
+            erros.append(f"{ano} {tipo}: ausente no painel")
+        elif abs(bi - painel["tipos"][tipo][indice[ano]]) > TOLERANCIA_BI:
+            erros.append(f"{ano} {tipo}: dbt {bi} x painel {painel['tipos'][tipo][indice[ano]]}")
+    return erros
+
+
+def conferir_emendas() -> int:
+    import duckdb
+
+    con = duckdb.connect(str(BANCO), read_only=True)
+    totais = con.execute("select ano, total_bi, executado_pct from mart_emendas_anual order by ano").fetchall()
+    tipos = con.execute("select ano, tipo, bi from mart_emendas_tipo_ano order by 1, 2").fetchall()
+    erros = comparar_emendas(totais, tipos, carregar_js(EMENDAS_JS))
+    if erros:
+        print("Divergências entre dbt e painel (emendas):", *erros, sep="\n  ")
+        return 1
+    print(f"Emendas: {len(totais)} anos e {len(tipos)} combinações ano x tipo conferidos, dbt = painel "
+          f"(tolerância {TOLERANCIA_BI}).")
+    return 0
+
+
 def main() -> int:
+    if "--emendas" in sys.argv:
+        return conferir_emendas()
     if "--despesas" in sys.argv:
         return conferir_despesas()
     import duckdb  # só aqui: os testes de `comparar_rgps` não precisam do DuckDB

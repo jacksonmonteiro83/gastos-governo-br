@@ -92,3 +92,28 @@ models:
           - not_null
           - accepted_values:
               values: ['Previdência social', 'Pessoal e encargos', 'Juros da dívida', 'Saúde, educação e assistência', 'Investimentos', 'Outras']
+
+  - name: stg_emendas
+    description: Emendas parlamentares por emenda x localidade x ação (R$ nominais).
+    columns:
+      - name: ano
+        tests: [not_null]
+      - name: empenhado
+        tests: [not_null]
+
+  - name: mart_emendas_anual
+    description: Total empenhado e taxa de execução por ano (R$ bi de hoje).
+    columns:
+      - name: ano
+        tests: [not_null, unique]
+      - name: total_bi
+        tests: [not_null]
+
+  - name: mart_emendas_tipo_ano
+    description: Empenhado por ano e tipo de emenda (R$ bi de hoje).
+    columns:
+      - name: tipo
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Individual (finalidade definida)', 'Individual (transferência especial)', 'Bancada', 'Comissão', 'Relator']

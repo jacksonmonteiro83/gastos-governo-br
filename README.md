@@ -18,8 +18,8 @@ Para onde vai o dinheiro do governo federal, em valores reais (corrigidos pelo I
 
 ## Stack
 - **Python / pandas** para ingestão (APIs e planilhas) e agregação
-- **Parquet** como formato intermediário; **DuckDB + dbt (dbt-duckdb)** para a camada analítica: staging, marts (previdência, juros, cartão, despesas) e testes de dados, incluindo um teste de privacidade do cartão
-- **Conferência cruzada:** `pipeline/conferir_dbt.py` compara os marts de previdência e de despesas do dbt (SQL) com os painéis publicados pelo Python (pandas); a conta feita de duas formas tem que bater
+- **Parquet** como formato intermediário; **DuckDB + dbt (dbt-duckdb)** para a camada analítica: staging, marts (previdência, juros, cartão, despesas, emendas) e testes de dados, incluindo um teste de privacidade do cartão
+- **Conferência cruzada:** `pipeline/conferir_dbt.py` compara os marts de previdência, despesas e emendas do dbt (SQL) com os painéis publicados pelo Python (pandas); a conta feita de duas formas tem que bater
 - **GitHub Actions** para atualização diária, com commits do bot e testes antes de publicar
 - **Painéis estáticos** (GitHub Pages) em `docs/`: HTML + SVG puro, sem dependências, com tooltip, tabela de dados e tema claro/escuro
 
@@ -51,11 +51,13 @@ python -m pipeline.agregar                   # docs/data.js (visão geral)
 python -m pipeline.agregar_previdencia       # docs/previdencia_data.js
 python -m pipeline.agregar_demografia        # docs/demografia_data.js
 make test                                    # testes Python
-make build                                   # dbt (tudo, exceto cartão e despesas)
+make build                                   # dbt (tudo, exceto cartão, despesas e emendas)
 make build-cpgf                              # dbt do cartão (precisa do Parquet do CPGF)
 make build-despesas                          # dbt das despesas (precisa do Parquet do orçamento)
 make conferir                                # dbt x painel (previdência)
 make conferir-despesas                       # dbt x painel (despesas)
+make build-emendas                           # dbt das emendas (precisa do Parquet das emendas)
+make conferir-emendas                        # dbt x painel (emendas)
 ```
 Para publicar: Settings → Pages → Deploy from a branch → `main` / `/docs`. Para ver local, sirva `docs/` (`python -m http.server`) e abra no navegador.
 
