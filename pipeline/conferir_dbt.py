@@ -3,7 +3,8 @@
 Duas implementações independentes (SQL no dbt, pandas no pipeline) da mesma conta: se divergirem,
 uma das duas está errada. Roda depois do `dbt build`; sai com código 1 se houver diferença.
 
-    python -m pipeline.conferir_dbt
+    python -m pipeline.conferir_dbt              # previdência (RGPS)
+    python -m pipeline.conferir_dbt --despesas   # despesas por ano e categoria
 """
 import json
 import sys
@@ -12,6 +13,7 @@ from pathlib import Path
 
 BANCO = Path("data/gastos.duckdb")
 PREVIDENCIA_JS = Path("docs/previdencia_data.js")
+DESPESAS_JS = Path("docs/despesas_data.js")
 TOLERANCIA_BI = 0.11  # o painel arredonda para 2 casas por série; a diferença é arredondamento
 
 
@@ -37,7 +39,44 @@ def comparar_rgps(linhas: list[tuple], painel: dict) -> list[str]:
     return erros
 
 
+def comparar_despesas(totais: list[tuple], categorias: list[tuple], painel: dict) -> list[str]:
+    """totais: (ano, total_bi) do mart_despesas_anual; categorias: (ano, categoria, pct) do
+    mart_despesas_categoria; painel: window.DESP. Os dois arredondam a 1 casa, então a tolerância é de arredondamento."""
+    erros = []
+    indice = {a: i for i, a in enumerate(painel["anos"])}
+    for ano, total in totais:
+        if ano not in indice:
+            erros.append(f"{ano}: ano está no dbt e não no painel")
+        elif abs(total - painel["total_bi"][indice[ano]]) > TOLERANCIA_BI:
+            erros.append(f"{ano} total: dbt {total} x painel {painel['total_bi'][indice[ano]]}")
+    for ano, cat, pct in categorias:
+        if ano not in indice or cat not in painel["composicao"]:
+            erros.append(f"{ano} {cat}: ausente no painel")
+            continue
+        js = painel["composicao"][cat][indice[ano]]
+        if js is None or abs(pct - js) > TOLERANCIA_BI:
+            erros.append(f"{ano} {cat}: dbt {pct}% x painel {js}%")
+    return erros
+
+
+def conferir_despesas() -> int:
+    import duckdb
+
+    con = duckdb.connect(str(BANCO), read_only=True)
+    totais = con.execute("select ano, total_bi from mart_despesas_anual order by ano").fetchall()
+    categorias = con.execute("select ano, categoria, pct from mart_despesas_categoria order by 1, 2").fetchall()
+    erros = comparar_despesas(totais, categorias, carregar_js(DESPESAS_JS))
+    if erros:
+        print("Divergências entre dbt e painel (despesas):", *erros, sep="\n  ")
+        return 1
+    print(f"Despesas: {len(totais)} anos e {len(categorias)} categorias conferidos, dbt = painel "
+          f"(tolerância {TOLERANCIA_BI}).")
+    return 0
+
+
 def main() -> int:
+    if "--despesas" in sys.argv:
+        return conferir_despesas()
     import duckdb  # só aqui: os testes de `comparar_rgps` não precisam do DuckDB
 
     con = duckdb.connect(str(BANCO), read_only=True)

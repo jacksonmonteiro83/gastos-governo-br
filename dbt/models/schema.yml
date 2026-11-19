@@ -67,3 +67,28 @@ models:
     columns:
       - name: ano
         tests: [not_null, unique]
+
+  - name: stg_despesas
+    description: Orçamento da despesa federal por ano e classificação (R$ nominais).
+    columns:
+      - name: ano
+        tests: [not_null]
+      - name: realizado
+        tests: [not_null]
+
+  - name: mart_despesas_anual
+    description: Total realizado por ano, sem amortização da dívida e reserva de contingência (R$ bi de hoje).
+    columns:
+      - name: ano
+        tests: [not_null, unique]
+      - name: total_bi
+        tests: [not_null]
+
+  - name: mart_despesas_categoria
+    description: Composição da despesa por ano em 6 categorias sem sobreposição.
+    columns:
+      - name: categoria
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Previdência social', 'Pessoal e encargos', 'Juros da dívida', 'Saúde, educação e assistência', 'Investimentos', 'Outras']
