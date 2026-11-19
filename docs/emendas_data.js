@@ -231,6 +231,171 @@ window.EMD = {
    "pct": 3.7
   }
  ],
+ "ref_por_habitante": [
+  {
+   "nome": "Roraima",
+   "bi": 0.95,
+   "pop_mi": 0.74,
+   "reais_hab": 1285.0
+  },
+  {
+   "nome": "Amapá",
+   "bi": 0.95,
+   "pop_mi": 0.81,
+   "reais_hab": 1184.0
+  },
+  {
+   "nome": "Acre",
+   "bi": 0.93,
+   "pop_mi": 0.88,
+   "reais_hab": 1051.0
+  },
+  {
+   "nome": "Tocantins",
+   "bi": 0.97,
+   "pop_mi": 1.59,
+   "reais_hab": 610.0
+  },
+  {
+   "nome": "Rondônia",
+   "bi": 0.89,
+   "pop_mi": 1.75,
+   "reais_hab": 508.0
+  },
+  {
+   "nome": "Sergipe",
+   "bi": 0.94,
+   "pop_mi": 2.3,
+   "reais_hab": 409.0
+  },
+  {
+   "nome": "Mato Grosso Do Sul",
+   "bi": 0.98,
+   "pop_mi": 2.92,
+   "reais_hab": 334.0
+  },
+  {
+   "nome": "Piauí",
+   "bi": 1.05,
+   "pop_mi": 3.38,
+   "reais_hab": 310.0
+  },
+  {
+   "nome": "Alagoas",
+   "bi": 0.96,
+   "pop_mi": 3.22,
+   "reais_hab": 297.0
+  },
+  {
+   "nome": "Rio Grande Do Norte",
+   "bi": 0.96,
+   "pop_mi": 3.46,
+   "reais_hab": 277.0
+  },
+  {
+   "nome": "Paraíba",
+   "bi": 1.12,
+   "pop_mi": 4.16,
+   "reais_hab": 270.0
+  },
+  {
+   "nome": "Espírito Santo",
+   "bi": 1.04,
+   "pop_mi": 4.13,
+   "reais_hab": 251.0
+  },
+  {
+   "nome": "Mato Grosso",
+   "bi": 0.97,
+   "pop_mi": 3.89,
+   "reais_hab": 250.0
+  },
+  {
+   "nome": "Distrito Federal",
+   "bi": 0.71,
+   "pop_mi": 3.0,
+   "reais_hab": 237.0
+  },
+  {
+   "nome": "Amazonas",
+   "bi": 0.97,
+   "pop_mi": 4.32,
+   "reais_hab": 225.0
+  },
+  {
+   "nome": "Maranhão",
+   "bi": 1.36,
+   "pop_mi": 7.02,
+   "reais_hab": 194.0
+  },
+  {
+   "nome": "Goiás",
+   "bi": 1.36,
+   "pop_mi": 7.42,
+   "reais_hab": 184.0
+  },
+  {
+   "nome": "Pernambuco",
+   "bi": 1.62,
+   "pop_mi": 9.56,
+   "reais_hab": 169.0
+  },
+  {
+   "nome": "Ceará",
+   "bi": 1.51,
+   "pop_mi": 9.27,
+   "reais_hab": 163.0
+  },
+  {
+   "nome": "Rio Grande Do Sul",
+   "bi": 1.82,
+   "pop_mi": 11.23,
+   "reais_hab": 162.0
+  },
+  {
+   "nome": "Pará",
+   "bi": 1.33,
+   "pop_mi": 8.71,
+   "reais_hab": 153.0
+  },
+  {
+   "nome": "Paraná",
+   "bi": 1.76,
+   "pop_mi": 11.89,
+   "reais_hab": 148.0
+  },
+  {
+   "nome": "Santa Catarina",
+   "bi": 1.2,
+   "pop_mi": 8.19,
+   "reais_hab": 147.0
+  },
+  {
+   "nome": "Bahia",
+   "bi": 2.17,
+   "pop_mi": 14.87,
+   "reais_hab": 146.0
+  },
+  {
+   "nome": "Minas Gerais",
+   "bi": 2.67,
+   "pop_mi": 21.39,
+   "reais_hab": 125.0
+  },
+  {
+   "nome": "Rio De Janeiro",
+   "bi": 2.11,
+   "pop_mi": 17.22,
+   "reais_hab": 122.0
+  },
+  {
+   "nome": "São Paulo",
+   "bi": 3.3,
+   "pop_mi": 46.08,
+   "reais_hab": 72.0
+  }
+ ],
+ "ano_populacao": 2025,
  "ref_por_autor": [
   {
    "nome": "COM. DA SAUDE",
