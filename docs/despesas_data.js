@@ -1,4 +1,101 @@
 window.DESP = {
+ "outras_ref": {
+  "total_bi": 913.1,
+  "por_funcao": [
+   {
+    "nome": "Encargos especiais",
+    "bi": 673.9,
+    "pct": 73.8
+   },
+   {
+    "nome": "Trabalho",
+    "bi": 120.7,
+    "pct": 13.2
+   },
+   {
+    "nome": "Agricultura",
+    "bi": 37.0,
+    "pct": 4.1
+   },
+   {
+    "nome": "Gestão ambiental",
+    "bi": 18.6,
+    "pct": 2.0
+   },
+   {
+    "nome": "Ciência e Tecnologia",
+    "bi": 16.4,
+    "pct": 1.8
+   },
+   {
+    "nome": "Defesa nacional",
+    "bi": 15.0,
+    "pct": 1.6
+   },
+   {
+    "nome": "Administração",
+    "bi": 9.0,
+    "pct": 1.0
+   },
+   {
+    "nome": "Segurança pública",
+    "bi": 5.0,
+    "pct": 0.5
+   },
+   {
+    "nome": "Demais",
+    "bi": 17.3,
+    "pct": 1.9
+   }
+  ],
+  "por_elemento": [
+   {
+    "nome": "Distribuição Constitucional ou Legal de Receitas",
+    "bi": 556.7,
+    "pct": 61.0
+   },
+   {
+    "nome": "Concessão de Empréstimos e Financiamentos",
+    "bi": 138.4,
+    "pct": 15.2
+   },
+   {
+    "nome": "Seguro Desemprego e Abono Salarial",
+    "bi": 51.9,
+    "pct": 5.7
+   },
+   {
+    "nome": "Despesas de Exercícios Anteriores",
+    "bi": 38.7,
+    "pct": 4.2
+   },
+   {
+    "nome": "Participação em Fundos, Organismos, ou Entidades Assemelhadas, Nacionais e Internacionais",
+    "bi": 31.9,
+    "pct": 3.5
+   },
+   {
+    "nome": "Subvenções econômicas",
+    "bi": 17.6,
+    "pct": 1.9
+   },
+   {
+    "nome": "Outros Serviços de Terceiros - Pessoa Jurídica",
+    "bi": 17.2,
+    "pct": 1.9
+   },
+   {
+    "nome": "Contribuições",
+    "bi": 12.2,
+    "pct": 1.3
+   },
+   {
+    "nome": "Demais",
+    "bi": 48.4,
+    "pct": 5.3
+   }
+  ]
+ },
  "anos": [
   2014,
   2015,
