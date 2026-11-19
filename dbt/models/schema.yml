@@ -21,7 +21,8 @@ models:
         tests:
           - not_null
           - accepted_values:
-              values: ['1.1', '1.1-A', '1.2', '1.2-A', '1.3', '1.3-A', '1.4', '1.4-A', '1.5', '1.5-A', '1.6']
+              arguments:
+                values: ['1.1', '1.1-A', '1.2', '1.2-A', '1.3', '1.3-A', '1.4', '1.4-A', '1.5', '1.5-A', '1.6']
       - name: data
         tests: [not_null]
 
@@ -48,11 +49,13 @@ models:
         tests:
           - not_null
           - accepted_values:
-              values: ['compra', 'saque', 'sigilo', 'outro']
+              arguments:
+                values: ['compra', 'saque', 'sigilo', 'outro']
       - name: favorecido_tipo
         tests:
           - accepted_values:
-              values: ['pj', 'mei', 'pf', 'sem_informacao']
+              arguments:
+                values: ['pj', 'mei', 'pf', 'sem_informacao']
               config:
                 where: "favorecido_tipo is not null"
 
@@ -91,7 +94,8 @@ models:
         tests:
           - not_null
           - accepted_values:
-              values: ['Previdência social', 'Pessoal e encargos', 'Juros da dívida', 'Saúde, educação e assistência', 'Investimentos', 'Outras']
+              arguments:
+                values: ['Previdência social', 'Pessoal e encargos', 'Juros da dívida', 'Saúde, educação e assistência', 'Investimentos', 'Outras']
 
   - name: stg_emendas
     description: Emendas parlamentares por emenda x localidade x ação (R$ nominais).
@@ -116,4 +120,5 @@ models:
         tests:
           - not_null
           - accepted_values:
-              values: ['Individual (finalidade definida)', 'Individual (transferência especial)', 'Bancada', 'Comissão', 'Relator']
+              arguments:
+                values: ['Individual (finalidade definida)', 'Individual (transferência especial)', 'Bancada', 'Comissão', 'Relator']
