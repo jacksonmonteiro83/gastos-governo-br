@@ -2,6 +2,11 @@ name: Inspecionar IBGE
 
 on:
   workflow_dispatch:
+    inputs:
+      modo:
+        description: "--xlsx (projeção 2024) ou --uf (população por UF)"
+        default: "--uf"
+        required: true
 
 jobs:
   inspecionar:
@@ -14,7 +19,9 @@ jobs:
           cache: pip
       - run: pip install requests pandas openpyxl
       - name: Inspecionar planilhas da projeção 2024
-        run: python -m pipeline.ibge --xlsx | tee ibge-inspecao.txt
+        env:
+          MODO: ${{ inputs.modo }}
+        run: python -m pipeline.ibge "$MODO" | tee ibge-inspecao.txt
       - uses: actions/upload-artifact@v4
         with:
           name: ibge-inspecao

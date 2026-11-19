@@ -4,6 +4,7 @@ Por enquanto só inspeção: descobre qual tabela traz a população por idade (
 são seus períodos, variáveis e classificações, para depois escrevermos a ingestão certa.
 
     python -m pipeline.ibge --inspecionar
+    python -m pipeline.ibge --uf          # população por UF (para tirar as emendas per capita)
 """
 import json
 import sys
@@ -127,8 +128,32 @@ def inspecionar_xlsx() -> None:
         _tentar(nome, um)
 
 
+SIDRA = "https://apisidra.ibge.gov.br/values"
+# Candidatas para população por UF: 6579 = estimativas anuais da população residente; 4714 = Censo 2022.
+POPULACAO_UF = {"6579 (estimativas anuais)": "/t/6579/n3/all/v/all/p/last%205",
+                "4714 (Censo 2022)": "/t/4714/n3/all/v/93/p/2022"}
+
+
+def inspecionar_populacao_uf() -> None:
+    """Consulta as tabelas de população por UF no SIDRA e mostra cabeçalho, linhas e períodos."""
+    for nome, caminho in POPULACAO_UF.items():
+        def um(caminho=caminho):
+            r = requests.get(SIDRA + caminho, timeout=60)
+            print("GET", r.url, "->", r.status_code)
+            r.raise_for_status()
+            dados = r.json()
+            print("linhas:", len(dados) - 1, "| cabeçalho:", json.dumps(dados[0], ensure_ascii=False))
+            for linha in dados[1:6]:
+                print("  ", json.dumps(linha, ensure_ascii=False))
+            print("   períodos:", sorted({l.get("D1C") or l.get("D2C") or "" for l in dados[1:]}))
+            print("   unidades:", sorted({l.get("MN", "") for l in dados[1:]}))
+        _tentar(f"População por UF, tabela {nome}", um)
+
+
 if __name__ == "__main__":
-    if "--xlsx" in sys.argv:
+    if "--uf" in sys.argv:
+        inspecionar_populacao_uf()
+    elif "--xlsx" in sys.argv:
         inspecionar_xlsx()
     elif "--ftp" in sys.argv:
         _tentar("Arquivos de projeção no servidor do IBGE", listar_ftp)
