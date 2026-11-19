@@ -144,6 +144,10 @@
     const fmtR = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 });
     document.getElementById("nota-uf").textContent = "Valor empenhado em " + ref + " dividido pela população estimada do estado (IBGE, " + D.ano_populacao +
       "). Fica de fora o que não tem estado definido.";
+    const a = PH[0], z = PH[PH.length - 1];
+    document.getElementById("nota-uf").textContent += " Em " + ref + ", " + a.nome + " recebeu R$ " + fmtR.format(a.reais_hab) + " por habitante e " + z.nome +
+      " R$ " + fmtR.format(z.reais_hab) + ", " + fmtR.format(Math.round(a.reais_hab / z.reais_hab)) + " vezes menos. O valor total por estado varia bem menos que a população: o maior estado recebe " + fmtR.format(Math.round(Math.max(...PH.map(x => x.bi)) / Math.min(...PH.map(x => x.bi)))) +
+      " vezes o menor valor, e tem " + fmtR.format(Math.round(Math.max(...PH.map(x => x.pop_mi)) / Math.min(...PH.map(x => x.pop_mi)))) + " vezes a população do menor estado. Parte disso vem da representação no Congresso: cada estado tem 3 senadores e pelo menos 8 deputados, e as emendas individuais são iguais para cada parlamentar.";
     document.getElementById("uf-titulo").textContent = "Dez estados com mais emenda por habitante";
     const top = PH.slice(0, 10), m = Math.max(...top.map(x => x.reais_hab));
     document.getElementById("b-uf").innerHTML = top.map(x =>

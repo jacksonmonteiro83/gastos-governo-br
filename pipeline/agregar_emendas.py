@@ -60,12 +60,13 @@ def por_habitante(emendas_uf: pd.Series, pop: pd.DataFrame | None, ano: int) -> 
     if not anos_ok:
         return [], None
     ano_pop = int(max(anos_ok))
-    p = pop[pop["ano"] == ano_pop].assign(chave=lambda x: x["uf"].map(_chave)).set_index("chave")["populacao"]
+    atual = pop[pop["ano"] == ano_pop].assign(chave=lambda x: x["uf"].map(_chave)).set_index("chave")
+    p, nomes = atual["populacao"], atual["uf"]   # nome com a grafia do IBGE ("Mato Grosso do Sul")
     linhas = []
     for nome, bi in emendas_uf.items():
         k = _chave(nome)
         if k in p.index and p[k] > 0:
-            linhas.append({"nome": str(nome).title() if str(nome).isupper() else str(nome), "bi": _num(bi, 2),
+            linhas.append({"nome": str(nomes[k]), "bi": _num(bi, 2),
                            "pop_mi": _num(p[k] / 1e6, 2), "reais_hab": _num(bi * 1e9 / p[k], 0)})
     return sorted(linhas, key=lambda x: -x["reais_hab"]), ano_pop
 

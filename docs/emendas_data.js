@@ -269,7 +269,7 @@ window.EMD = {
    "reais_hab": 409.0
   },
   {
-   "nome": "Mato Grosso Do Sul",
+   "nome": "Mato Grosso do Sul",
    "bi": 0.98,
    "pop_mi": 2.92,
    "reais_hab": 334.0
@@ -287,7 +287,7 @@ window.EMD = {
    "reais_hab": 297.0
   },
   {
-   "nome": "Rio Grande Do Norte",
+   "nome": "Rio Grande do Norte",
    "bi": 0.96,
    "pop_mi": 3.46,
    "reais_hab": 277.0
@@ -347,7 +347,7 @@ window.EMD = {
    "reais_hab": 163.0
   },
   {
-   "nome": "Rio Grande Do Sul",
+   "nome": "Rio Grande do Sul",
    "bi": 1.82,
    "pop_mi": 11.23,
    "reais_hab": 162.0
@@ -383,7 +383,7 @@ window.EMD = {
    "reais_hab": 125.0
   },
   {
-   "nome": "Rio De Janeiro",
+   "nome": "Rio de Janeiro",
    "bi": 2.11,
    "pop_mi": 17.22,
    "reais_hab": 122.0
