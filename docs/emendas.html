@@ -74,7 +74,7 @@
       <p><b>Empenhado.</b> É o valor que o governo reservou para a emenda no ano; nem tudo vira pagamento. A taxa de execução soma o que foi pago no ano e o que foi pago depois, como resto a pagar, sobre o empenhado de cada ano de emenda. Os anos recentes ainda estão em execução, então a taxa deles sobe com o tempo. O ano corrente, se aparecer, é parcial.</p>
       <p><b>Valores</b> em reais de hoje: nominal de cada ano corrigido pelo IPCA médio do ano da emenda.</p>
       <p><b>Tipos.</b> Individuais são de cada parlamentar; nas <i>transferências especiais</i> o dinheiro vai direto ao estado ou município, sem convênio nem finalidade definida de antemão. Bancada e comissão têm autoria coletiva. O tipo e as datas seguem a classificação do Portal da Transparência; por isso valores de "relator" aparecem antes de 2020 como o Portal os classifica.</p>
-      <p><b>Localização.</b> Parte dos valores vem sem estado definido (nacional, múltiplo ou exterior) e não entra no ranking de estados nem de regiões. O valor por habitante divide o empenhado do estado pela população estimada pelo IBGE; o Distrito Federal pode aparecer alto por sediar órgãos federais.</p>
+      <p><b>Localização.</b> Parte dos valores vem sem estado definido (nacional, múltiplo ou exterior) e não entra no ranking de estados nem de regiões. O valor por habitante divide o empenhado do estado pela população estimada pelo IBGE.</p>
       <p><b>Fonte:</b> <a href="https://portaldatransparencia.gov.br/download-de-dados/emendas-parlamentares">Portal da Transparência (CGU), Emendas Parlamentares</a>. Código e método: <a href="https://github.com/jacksonmonteiro83/gastos-governo-br">github.com/jacksonmonteiro83/gastos-governo-br</a>.</p>
     </footer>
   </div>
@@ -143,7 +143,7 @@
   if (PH && PH.length) {
     const fmtR = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 });
     document.getElementById("nota-uf").textContent = "Valor empenhado em " + ref + " dividido pela população estimada do estado (IBGE, " + D.ano_populacao +
-      "). Estados pequenos tendem a ficar no topo: a regra de repartição das emendas não é proporcional à população. Sem o que não tem estado definido.";
+      "). Fica de fora o que não tem estado definido.";
     document.getElementById("uf-titulo").textContent = "Dez estados com mais emenda por habitante";
     const top = PH.slice(0, 10), m = Math.max(...top.map(x => x.reais_hab));
     document.getElementById("b-uf").innerHTML = top.map(x =>
