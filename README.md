@@ -13,7 +13,7 @@ Para onde vai o dinheiro do governo federal, em valores reais (corrigidos pelo I
 - **Despesas por função (2025, sem rolagem da dívida):** R$ 3,27 tri em valores de hoje. A previdência social é a maior função, com 32,8%; juros e encargos da dívida, 11,7%; saúde, 7,0%; educação, 5,2%. A rolagem da dívida (amortização e refinanciamento) foi mais R$ 1,87 tri, fora dessas contas. Sem sobreposição, previdência, pessoal e juros somam 52,2% do gasto realizado (R$ 1,71 tri, cerca de R$ 4,7 bi por dia); saúde, educação e assistência ficam com 18,9%, e investimentos com 1,0% (subestimado, ver método).
 - **Previdência (INSS/RGPS):** em 2025 a arrecadação líquida cobriu 69,1% dos benefícios; o Tesouro pagou a diferença, R$ 333 bi (2,5% do PIB). Em 1997 a cobertura era de 94%. Desde 2010, já descontada a inflação, os benefícios cresceram 72% e a arrecadação, 43%. A diferença chegou a 3,4% do PIB em 2020 e desde então recuou.
 - **Envelhecimento:** a página de Previdência cruza a conta com a projeção de população do IBGE (revisão 2024): idosos de 65+ para cada 100 pessoas de 15 a 64 anos, de 2000 a 2070.
-- **Emendas parlamentares:** R$ 49,7 bi empenhados em 2025, em valores de hoje. As transferências especiais (direto a estados e municípios) são 14,8%; as emendas de relator somaram R$ 93,3 bi até 2022 e não aparecem nos dados depois disso, enquanto as de comissão saíram de R$ 0,4 bi (2022) para R$ 11,9 bi (2025). 25,9% do valor de 2025 vem sem estado definido.
+- **Emendas parlamentares:** R$ 49,7 bi empenhados em 2025, em valores de hoje. As transferências especiais (direto a estados e municípios) são 14,8%; as emendas de relator somaram R$ 93,3 bi até 2022 e não aparecem nos dados depois disso, enquanto as de comissão saíram de R$ 0,4 bi (2022) para R$ 11,9 bi (2025). 25,9% do valor de 2025 vem sem estado definido. Por habitante, Roraima recebeu R$ 1.285 em 2025 e São Paulo R$ 72 (18 vezes menos): o total por estado varia cerca de 5 vezes, e a população, 62.
 - **Cartão corporativo (jan/2013 a out/2026):** R$ 1,40 bi gastos, em valores de hoje. 48,1% do total está sob sigilo, sem data nem favorecido divulgados (41,4% em 2025). Os saques em espécie são 10,1% do total.
 
 ## Stack
@@ -29,6 +29,7 @@ Para onde vai o dinheiro do governo federal, em valores reais (corrigidos pelo I
 | Tesouro Transparente | Resultado do Tesouro Nacional (RTN, desde 1997): juros, previdência, despesas, em valores correntes e em R$ constantes (IPCA) | implementado (`pipeline/tesouro.py`) |
 | Banco Central (SGS) | IPCA (433), Selic mensal (4390), PIB 12m (4382); juros nominais 4606/4607 para conferência | implementado (`pipeline/bcb.py`, `pipeline/validar_juros.py`) |
 | IBGE | Projeções da População, revisão 2024 (2000 a 2070) | implementado (`pipeline/agregar_demografia.py`) |
+| IBGE (SIDRA 6579) | População residente estimada por UF, para o valor de emendas por habitante | implementado (`pipeline/populacao_uf.py`) |
 | Portal da Transparência (CGU) | Emendas parlamentares, arquivo único desde 2014 (só o arquivo principal; sem favorecidos) | implementado (`pipeline/emendas.py`, `pipeline/agregar_emendas.py`) |
 | Portal da Transparência | Cartão corporativo (CPGF), mensal | implementado (`pipeline/cpgf.py`, `pipeline/agregar_cpgf.py`) |
 | Portal da Transparência | Orçamento da despesa por ano (órgão, função, grupo de despesa; orçado, empenhado e realizado), sem favorecidos | implementado (`pipeline/transparencia.py`, `pipeline/agregar_despesas.py`) |
@@ -68,7 +69,8 @@ Para publicar: Settings → Pages → Deploy from a branch → `main` / `/docs`.
 
 ## Limitações conhecidas
 - O Portal da Transparência limita downloads seguidos: a primeira carga completa do cartão (2013 até hoje) precisou de várias execuções do workflow, que guarda os ZIPs já baixados em cache. As atualizações mensais seguintes são rápidas.
+- Emendas: o valor é o empenhado (reservado no ano), não o pago, e os anos recentes ainda estão em execução. Parte do valor vem sem estado definido e fica fora do ranking por estado. O Portal classifica como "relator" valores anteriores a 2020; o painel segue essa classificação sem corrigi-la.
 - Ainda não há despesas por favorecido ou por documento (empenho, liquidação, pagamento): são arquivos enormes e com pessoas físicas, e o painel usa o orçamento agregado.
 
 ## Atualização
-O workflow **Atualizar dados** roda todo dia, baixa as fontes, executa os testes e publica os `*_data.js`. O workflow **Atualizar CPGF** roda no dia 5 de cada mês, ou manualmente.
+O workflow **Atualizar dados** roda todo dia, baixa as fontes, executa os testes e publica os `*_data.js`. Os workflows **Atualizar CPGF** (dia 5), **Atualizar despesas** (dia 6) e **Atualizar emendas** (dia 7) rodam uma vez por mês, ou manualmente.
