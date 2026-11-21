@@ -6,10 +6,10 @@ escolhe o ano mais recente disponível até o ano pedido.
 
     python -m pipeline.populacao_uf
 """
-import requests
 import pandas as pd
 
 from pipeline.config import RAW_DIR
+from pipeline.rede import get_com_retentativas
 
 URL = "https://apisidra.ibge.gov.br/values/t/6579/n3/all/v/9324/p/all"
 SAIDA = RAW_DIR / "populacao_uf.parquet"
@@ -28,7 +28,7 @@ def normalizar(linhas: list[dict]) -> pd.DataFrame:
 
 
 def main() -> None:
-    r = requests.get(URL, timeout=120)
+    r = get_com_retentativas(URL, timeout=120)
     print(f"GET {URL} -> HTTP {r.status_code}")
     r.raise_for_status()
     df = normalizar(r.json())

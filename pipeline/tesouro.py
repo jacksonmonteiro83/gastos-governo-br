@@ -21,6 +21,8 @@ from pathlib import Path
 import pandas as pd
 import requests
 
+from pipeline.rede import get_com_retentativas
+
 from pipeline.config import RAW_DIR
 
 CKAN_PACKAGE_SHOW = "https://www.tesourotransparente.gov.br/ckan/api/3/action/package_show"
@@ -50,19 +52,15 @@ def escolher_recurso(pacote: dict, resource_id: str = RESOURCE_ID) -> str:
 
 
 def resolver_url() -> str:
-    r = requests.get(CKAN_PACKAGE_SHOW, params={"id": DATASET_ID}, timeout=60)
-    r.raise_for_status()
+    r = get_com_retentativas(CKAN_PACKAGE_SHOW, {"id": DATASET_ID})
     return escolher_recurso(r.json())
 
 
 def baixar(destino: Path = DESTINO) -> Path:
     url = resolver_url()
     destino.parent.mkdir(parents=True, exist_ok=True)
-    with requests.get(url, stream=True, timeout=300) as r:
-        r.raise_for_status()
-        with open(destino, "wb") as f:
-            for bloco in r.iter_content(chunk_size=1 << 20):
-                f.write(bloco)
+    r = get_com_retentativas(url, timeout=300)
+    destino.write_bytes(r.content)
     print(f"Baixado: {url}\n -> {destino} ({destino.stat().st_size / 1e6:.1f} MB)")
     return destino
 

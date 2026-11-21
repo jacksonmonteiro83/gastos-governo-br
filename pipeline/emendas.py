@@ -18,6 +18,7 @@ import pandas as pd
 import requests
 
 from pipeline.config import RAW_DIR
+from pipeline.rede import get_com_retentativas
 from pipeline.transparencia import _numero, _slug, ler_csv
 
 URL = "https://portaldatransparencia.gov.br/download-de-dados/emendas-parlamentares/UNICO"
@@ -72,7 +73,7 @@ def baixar(forcar: bool = False) -> Path:
     destino = DESTINO / "emendas.zip"
     if not forcar and destino.exists() and zipfile.is_zipfile(destino):
         return destino
-    r = requests.get(URL, timeout=600)
+    r = get_com_retentativas(URL, timeout=600)
     print(f"GET {URL} -> HTTP {r.status_code}, {r.headers.get('content-type')}, {len(r.content):,} bytes")
     r.raise_for_status()
     destino.write_bytes(r.content)
