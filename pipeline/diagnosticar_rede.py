@@ -15,6 +15,9 @@ ALVOS = [
     "https://tesourotransparente.gov.br/ckan/api/3/action/package_show?id=ab56485b-9c40-4efb-8563-9ce3e1973c4b",
     "https://www.tesourotransparente.gov.br/",
     "https://www.gov.br/",   # controle: um site .gov.br qualquer
+    "https://portaldatransparencia.gov.br/download-de-dados/emendas-parlamentares/UNICO",  # despesas, cartão e emendas
+    "https://apisidra.ibge.gov.br/values/t/6579/n3/all/v/9324/p/last%201",                 # IBGE (população por UF)
+    "https://ftp.ibge.gov.br/Projecao_da_Populacao/Projecao_da_Populacao_2024/",           # IBGE (projeções)
     "https://api.bcb.gov.br/dados/serie/bcdata.sgs.433/dados/ultimos/1?formato=json",  # controle: o BCB funciona
 ]
 NAVEGADOR = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/124 Safari/537.36"}
@@ -30,8 +33,8 @@ def dns(host: str) -> None:
 
 def http(url: str, **kw) -> str:
     try:
-        r = requests.get(url, timeout=30, **kw)
-        return f"HTTP {r.status_code}, {len(r.content):,} bytes, {r.headers.get('content-type')}"
+        r = requests.get(url, timeout=30, stream=True, **kw)   # stream: não baixa o arquivo inteiro, só o cabeçalho
+        return f"HTTP {r.status_code}, {r.headers.get('content-length', '?')} bytes, {r.headers.get('content-type')}"
     except Exception as e:  # noqa: BLE001 - é um diagnóstico, queremos ver qualquer erro
         return f"ERRO {type(e).__name__}: {str(e)[:140]}"
 

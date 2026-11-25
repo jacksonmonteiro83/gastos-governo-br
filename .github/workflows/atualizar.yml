@@ -19,18 +19,34 @@ jobs:
           cache: pip
       - run: pip install -r requirements.txt
       - run: python -m pytest -q
-      - run: make ingest
-      - run: python -m pipeline.agregar
-      - run: python -m pipeline.agregar_previdencia
+      # Se o Tesouro estiver inacessível (o gov.br às vezes recusa conexões vindas do GitHub), a run não cai:
+      # os painéis ficam com os últimos dados publicados e a run mostra um aviso amarelo.
+      - id: ingest
+        continue-on-error: true
+        run: make ingest
+      - name: Aviso de fonte inacessível
+        if: steps.ingest.outcome == 'failure'
+        run: |
+          echo "::warning title=Dados não atualizados::Não foi possível baixar o BCB ou o Tesouro; os painéis seguem com os últimos dados publicados."
+          echo "### Dados não atualizados" >> "$GITHUB_STEP_SUMMARY"
+          echo "O download do BCB ou do Tesouro falhou. Os painéis continuam com os últimos dados publicados. Veja a etapa 'make ingest'." >> "$GITHUB_STEP_SUMMARY"
+      - if: steps.ingest.outcome == 'success'
+        run: python -m pipeline.agregar
+      - if: steps.ingest.outcome == 'success'
+        run: python -m pipeline.agregar_previdencia
       - name: Demografia (IBGE, revisão 2024)
+        if: steps.ingest.outcome == 'success'
         run: python -m pipeline.agregar_demografia
       - name: Publicar dados do dashboard
+        if: steps.ingest.outcome == 'success'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add docs/data.js docs/previdencia_data.js docs/demografia_data.js
           git diff --cached --quiet || (git commit -m "Atualiza dados do dashboard" && git pull --rebase && git push)
       # dbt por último: uma falha nele não impede a publicação dos dados acima.
-      - run: make build
+      - if: steps.ingest.outcome == 'success'
+        run: make build
       - name: Conferir dbt x painel
+        if: steps.ingest.outcome == 'success'
         run: make conferir
