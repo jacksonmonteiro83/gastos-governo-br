@@ -144,14 +144,14 @@ def normalizar(caminho: Path = DESTINO) -> pd.DataFrame:
     faltando = set(ABAS_MENSAIS) - set(abas)
     if faltando:
         print(f"Aviso: abas ausentes no arquivo: {sorted(faltando)}")
-    partes = [normalizar_aba(xls.parse(a, header=None), a) for a in abas]
+    partes = [normalizar_aba(pd.read_excel(xls, sheet_name=a, header=None), a) for a in abas]
     return pd.concat(partes, ignore_index=True)
 
 
 def inspecionar(caminho: Path = DESTINO, linhas: int = 6) -> None:
     xls = pd.ExcelFile(caminho)
     for aba in xls.sheet_names:
-        df = xls.parse(aba, header=None, nrows=200)
+        df = pd.read_excel(xls, sheet_name=aba, header=None, nrows=200)
         print(f"\n=== {aba} === (amostra: {df.shape[0]} linhas x {df.shape[1]} colunas)")
         print(df.iloc[:linhas, :6].to_string())
 

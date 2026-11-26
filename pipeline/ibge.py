@@ -119,7 +119,7 @@ def inspecionar_xlsx() -> None:
             xl = pd.ExcelFile(arq)
             print(nome, "| abas:", xl.sheet_names)
             for aba in xl.sheet_names[:3]:
-                df = xl.parse(aba, header=None)
+                df = pd.read_excel(xl, sheet_name=aba, header=None)
                 print(f"--- aba '{aba}' {df.shape[0]}x{df.shape[1]}")
                 with pd.option_context("display.width", 250, "display.max_columns", 14, "display.max_colwidth", 38):
                     print(df.head(14).iloc[:, :12].to_string())
