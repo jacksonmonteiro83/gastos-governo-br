@@ -30,6 +30,7 @@ DATASET_ID = "ab56485b-9c40-4efb-8563-9ce3e1973c4b"
 RESOURCE_ID = "527ccdb1-3059-42f3-bf23-b5e3ab4c6dc6"  # Série Histórica - Mensal (XLSX)
 DESTINO = RAW_DIR / "tesouro_serie_historica.xlsx"
 SAIDA = RAW_DIR / "tesouro_rtn_mensal.parquet"
+MANUAL = Path("dados_manuais") / "tesouro_serie_historica.xlsx"   # reserva: colocado à mão, vai no repositório
 
 # Abas mensais em formato "linhas = contas, colunas = meses".
 # (1.2-B é acumulado em 12 meses e fica de fora de propósito.)
@@ -56,10 +57,21 @@ def resolver_url() -> str:
     return escolher_recurso(r.json())
 
 
-def baixar(destino: Path = DESTINO) -> Path:
-    url = resolver_url()
+def baixar(destino: Path = DESTINO, manual: Path = MANUAL) -> Path:
+    """Baixa o XLSX do Tesouro. Se o site recusar a conexão (o gov.br às vezes bloqueia os servidores do
+    GitHub), usa o arquivo colocado à mão em dados_manuais/ e avisa; sem ele, o erro original segue."""
     destino.parent.mkdir(parents=True, exist_ok=True)
-    r = get_com_retentativas(url, timeout=300)
+    try:
+        url = resolver_url()
+        r = get_com_retentativas(url, timeout=300)
+    except RuntimeError as erro:
+        if not manual.exists():
+            raise
+        destino.write_bytes(manual.read_bytes())
+        data = dt.datetime.fromtimestamp(manual.stat().st_mtime).strftime("%d/%m/%Y")
+        print(f"::warning title=Tesouro inacessível::usando o arquivo manual {manual} ({manual.stat().st_size / 1e6:.1f} MB); "
+              f"atualize-o com a série histórica mais recente do Tesouro. Erro: {str(erro)[:120]}")
+        return destino
     destino.write_bytes(r.content)
     print(f"Baixado: {url}\n -> {destino} ({destino.stat().st_size / 1e6:.1f} MB)")
     return destino

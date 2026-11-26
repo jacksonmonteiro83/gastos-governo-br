@@ -70,3 +70,23 @@ def test_normalizar_aba_corrente_sem_referencia():
     bruto.iloc[2, 0] = "R$ Milhões - Valores Correntes"
     df = normalizar_aba(bruto, "1.2")
     assert set(df["base"]) == {"corrente"} and df["referencia"].isna().all()
+
+
+import pytest
+
+from pipeline import tesouro as T
+
+
+def test_baixar_usa_arquivo_manual_quando_o_site_recusa(tmp_path, monkeypatch, capsys):
+    manual = tmp_path / "manual.xlsx"
+    manual.write_bytes(b"xlsx de reserva")
+    monkeypatch.setattr(T, "resolver_url", lambda: (_ for _ in ()).throw(RuntimeError("Download falhou 5 vezes")))
+    destino = T.baixar(tmp_path / "raw" / "t.xlsx", manual)
+    assert destino.read_bytes() == b"xlsx de reserva"
+    assert "::warning" in capsys.readouterr().out
+
+
+def test_baixar_sem_arquivo_manual_repassa_o_erro(tmp_path, monkeypatch):
+    monkeypatch.setattr(T, "resolver_url", lambda: (_ for _ in ()).throw(RuntimeError("Download falhou 5 vezes")))
+    with pytest.raises(RuntimeError, match="5 vezes"):
+        T.baixar(tmp_path / "t.xlsx", tmp_path / "nao_existe.xlsx")
